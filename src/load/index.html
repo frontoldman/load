@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>load</title>
+<style type="text/css">
+
+
+</style>
+<script type="text/javascript" src="load.js"></script>
+</head>
+
+<body>
+
+	<script>
+		require.openDebug();
+		require('module/a',function(a){
+			console.log(a.name);
+		})
+	</script>
+</body>
+</html>

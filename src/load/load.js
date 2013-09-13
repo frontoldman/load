@@ -15,13 +15,27 @@
 		__slice = Array.prototype.slice,
 		__head = document.head || document.getElementsByTagName('head')[0] || document.documentElement; //他们都这么写
 
-
+		
+		//重置console,解决ie6报错
         if(!global.console){
              global.console = {
                 log:function(){}
              }
         }
-
+	
+	/*
+	*解析html文件url
+	*/
+	var prefixUrl;
+	
+	;(function(globalUrl){
+		function dirname(path) {
+			var s = path.match(/.*(?=\/.*$)/);
+			return (s ? s[0] : '.') + '/';
+		}
+		prefixUrl = dirname(globalUrl);	
+		console.log(prefixUrl);
+	})(global.location.href)
 
    //从seajs抠出来的
     var currentlyAddingScript;
@@ -61,19 +75,20 @@
         if(args.length < 1){
             return;
         }
+		var url = args[0];
         //console.log(__loaderContainer);
-        var url = formatURL(args[0]);//格式化url参数
+        url = formatURL(url);//格式化url参数
         var modulesList = {length:0};
         var lock = false;
         if( url && url.length ){
             for(var i = 0 ,len = url.length;i<len;i++){ //只有modulesList的长度==url这个数组的长度才执行回调                                       
-                modulesList[url[i]] = i;                //通过define完成递归
+                
+				modulesList[url[i]] = i;                //通过define完成递归
                 if(__loaderContainer[url[i]]){
                     modulesList[i] = __loaderContainer[url[i]]; 
                     modulesList.length ++;
                     callback(i);
                 }else{     
-
                     __loadScript(url[i],function(exports,url){
                         modulesList[modulesList[url]]= exports;
                         modulesList.length ++;
@@ -95,6 +110,14 @@
 
         
 	}
+	
+	//开启debug模式，默认不开启，开启之后执行以下操作
+	//1、加载的脚本script不会被删除。
+	var debug = false;
+	__load.openDebug = function(){
+		debug = true;
+	}
+	
 	
 	__loadScript = function(){ //插入脚本
 		var args = arguments,
@@ -128,7 +151,7 @@
 
 
                 //IE 在模块define的时候已经取得当前url,已经push进去了
-                
+               // console.log(__loaderContainer[url])
                 if(__loaderContainer[url]) {
                     if(!__loaderContainer[url].__$delay$){//模块中包含__$delay$ 就是有依赖的模块需要等待
                        // console.log('入口');
@@ -145,7 +168,7 @@
                 }
                 _script.onload = _script.onreadystatechange = null;//解决ie9双绑定的问题
 
-                if ( _script.parentNode ) {             //他们都这么写
+                if ( _script.parentNode && !debug) {             //他们都这么写
                     _script.parentNode.removeChild( _script );
                 }
 
@@ -254,18 +277,18 @@
     function formatURL(relay){
 
         relay = __type(relay) === "[object String]" ? [relay] : relay;
-		//alert(__type(relay))
          if (relay && __type(relay) === "[object Array]") {
             for(var i = 0 ,len = relay.length; i<len;i++){
-                relay[i] = relay[i].replace(/^\s+|\s+$/g,"");
+                relay[i] = relay[i].replace(/^\s+|\s+$/g,"");//去掉首尾空格
                 if(relay[i].length<=0){
                     relay.splice(i,1);
                     continue;
                 }
+				
+				//console.log(prefixUrl)
                 relay[i] = /\.\w+\s*$/.test(relay[i]) ? relay[i] : relay[i] + '.js'; 
             }
          }
-		//alert(relay)
          return relay;
     }
     /**
