@@ -7,14 +7,14 @@
 
 
 </style>
-<script type="text/javascript" src="load.js"></script>
+<script type="text/javascript" src="../../load.js"></script>
 </head>
 
 <body>
 
 	<script>
 		require.openDebug();
-		require('/module/a',function(a){
+		require('.../module/a',function(a){
 			console.log(a.name);
 		})
 	</script>

@@ -275,18 +275,35 @@
 
     //过滤传入，格式化传入的参数
     function formatURL(relay){
-
+		var currentUrl,
+			_prefixUrl = prefixUrl;
         relay = __type(relay) === "[object String]" ? [relay] : relay;
          if (relay && __type(relay) === "[object Array]") {
             for(var i = 0 ,len = relay.length; i<len;i++){
-                relay[i] = relay[i].replace(/^\s+|\s+$/g,"");//去掉首尾空格
-                if(relay[i].length<=0){
+                currentUrl = relay[i].replace(/^\s+|\s+$/g,"");//去掉首尾空格
+                if(currentUrl.length<=0){
                     relay.splice(i,1);
                     continue;
                 }
 				
+				//转换相对路径为绝对路径
+				if(/^\.\//.test(currentUrl)){//./开头
+					currentUrl = currentUrl.replace(/^\.\//,"");
+				}else if(/^\//.test(currentUrl)){// /开头
+					currentUrl = currentUrl.replace(/^\//,"");
+				}else if(/^\.\./.test(currentUrl)){//....../开头
+					var directoryDeep = /(\.+)\.\//.exec(currentUrl)[1].length,//目录深度					
+						newPrefixUrlPattern = new RegExp('(\\\w+\/){'+ directoryDeep +'}$','ig'),
+						theDirectoryNeedToBeReplaced = newPrefixUrlPattern.exec(_prefixUrl)[0];
+						
+					_prefixUrl = _prefixUrl.replace(theDirectoryNeedToBeReplaced,'');
+					currentUrl = /\.+\/(.*)$/.exec(currentUrl)[1];
+				}else{
+					_prefixUrl = '';
+				}			
 				//console.log(prefixUrl)
-                relay[i] = /\.\w+\s*$/.test(relay[i]) ? relay[i] : relay[i] + '.js'; 
+				currentUrl = _prefixUrl + currentUrl;
+                relay[i] = /\.\w+\s*$/.test(currentUrl) ? currentUrl : currentUrl + '.js'; 
             }
          }
          return relay;
