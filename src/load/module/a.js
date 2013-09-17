@@ -1,4 +1,4 @@
-define('./b',function(b){
+define(['./b','./c'],function(b){
 	return {
 		name:'a '+ b.name
 	}

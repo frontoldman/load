@@ -19,7 +19,9 @@
         },
 		__slice = Array.prototype.slice,
 		__head = document.head || document.getElementsByTagName('head')[0] || document.documentElement; //他们都这么写
-
+		
+		//这是一个正在加载的模块的列表存储器，用来解决加载相同模块的
+		__loaderContainer.__TemporaryLoadList = {};
 		
 		//重置console,解决ie6报错
         if(!global.console){
@@ -78,22 +80,23 @@
             return;
         }
 		var url = args[0];
-        //console.log(__loaderContainer);
+        
+		//判断一个脚本是否已经加载，应该从开始加载的时候锁定，需要解决?????
         url = formatURL(url);//格式化url参数
-        var modulesList = {length:0};
+        var modulesLists = {length:0};
         var lock = false;
         if( url && url.length ){
             for(var i = 0 ,len = url.length;i<len;i++){ //只有modulesList的长度==url这个数组的长度才执行回调                                       
                 
-				modulesList[url[i]] = i;                //通过define完成递归
+				modulesLists[url[i]] = i;                //通过define完成递归
                 if(__loaderContainer[url[i]]){
-                    modulesList[i] = __loaderContainer[url[i]]; 
-                    modulesList.length ++;
+                    modulesLists[i] = __loaderContainer[url[i]]; 
+                    modulesLists.length ++;
                     callback(i);
                 }else{     
                     __loadScript(url[i],function(exports,url){
-                        modulesList[modulesList[url]]= exports;
-                        modulesList.length ++;
+                        modulesLists[modulesLists[url]]= exports;
+                        modulesLists.length ++;
                         callback(i);
                     });
                 }
@@ -101,10 +104,10 @@
         }
 
         function callback(x){               
-            if(modulesList.length >= len){      //require的回调执行时机
+            if(modulesLists.length >= len){      //require的回调执行时机
                 // console.log(modulesList);
                 if(__type(args[1]) === '[object Function]'){
-                    args[1].apply(null,__slice.call(modulesList,0));//ie6 apply 第二个参数必须是数组不能是类数组的对象
+                    args[1].apply(null,__slice.call(modulesLists,0));//ie6 apply 第二个参数必须是数组不能是类数组的对象
                 }
                 lock = true;
             }
@@ -161,8 +164,7 @@
                     }else{                                  //为了能够执行回调，把回调返回到这个临时对象中，
                         __loaderContainer[url].factory = args[1];
                         __loaderContainer[url].url = url;
-                    }
-                    
+                    }                    
                     __recentRandom = 0;
                 }else{                                      //标准模块是可以准确的判断加载是否成功
                     __loaderContainer[url] = false;
@@ -192,6 +194,7 @@
 
         currentlyAddingScript = _script;
         __head.insertBefore( _script, __head.firstChild );
+		__loaderContainer.__TemporaryLoadList[url] = true;
         currentlyAddingScript = null;
 	}
 
@@ -236,18 +239,32 @@
        //__tempFactory是个临时模块，通过这个理临时模块占位，然后通过这个临时模块带回来url和回调函数，一层一层的
        //递归下去，(其实不是递归，只不过把当前回调传入到下一层去了)
        var deep = { length:0 },__tempFactory = {__$delay$:true};//这是一个神奇的对象
-
+	
+		
        __analyticDefine(__tempFactory,id);            //第一个脚本已经load,需要解析,有依赖，传入一个对象延迟执行
 		
-		var i = 0,len ;
+		var i = 0,len ,currentLoad;
 		//通过一个异步让模块先解析完成并获得url
 		setTimeout(function(){
+			
 			relay = formatURL(relay,__tempFactory.url);
 			for (len = relay.length; i < len; i++) {               
 			   deep[relay[i]] = i;          //顺序传递参数
-
-			   if(__loaderContainer[relay[i]]){                    
+				currentLoad = __loaderContainer.__TemporaryLoadList[relay[i]];
+			   if(__loaderContainer[relay[i]]){
 					defineCallback(__loaderContainer[relay[i]],relay[i]);
+			   }else if(currentLoad){
+					//判断这个脚本是不是正在加载，却还没有加载成功，并没有成功解析
+					(function(list_n){
+						var list_n_interval = setInterval(function(){
+													var exports = __loaderContainer[list_n];
+													if(exports){
+														clearInterval(list_n_interval);
+														defineCallback(exports,list_n)
+													}
+												},1)						
+					})(relay[i])
+					
 			   }else{
 					__loadScript(relay[i],function(exports,url){  //需要把所有的exports传入到a的回调中去
 						defineCallback(exports,url);
@@ -261,6 +278,7 @@
        // }
 
         function defineCallback(exports,url){
+			//console.log(exports)
             var index = deep[url];               
                 deep[index] = exports ;
                 deep.length++ ;
@@ -268,13 +286,10 @@
                     //能正确解析依赖的精髓
                     funOrObj =  __type(funOrObj) === "[object Function]" ? funOrObj.apply(null,__slice.call(deep,0)) : funOrObj;
                     __loaderContainer[__tempFactory.url] = funOrObj;
-
                     var id = __mappingOfIDAndURL[__tempFactory.url];
-
                     if(id){
                         __loaderContainer[id] = funOrObj;
-                    }
-     
+                    }    
                     __tempFactory.factory(funOrObj,__tempFactory.url);
                 }
         }
