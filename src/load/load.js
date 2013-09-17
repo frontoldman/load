@@ -254,7 +254,9 @@
 					})
 			   }
 			}
-		},0)
+			//TODO:修复ie延时问题
+			//此处为ie加个延迟,ie不能正确解析模块与对应url之间的关系，导致地址判断异常，在模块较多的时候延时会比较严重
+		},__isIE?11:0)
 		
        // }
 
@@ -292,6 +294,7 @@
 		var currentUrl,
 			//根据originUrl判断是从html页面引入的模块还是从define里面引入的模块
 			_prefixUrl = originUrl?dirname(originUrl):prefixUrl;
+			//console.log(originUrl)
         relay = __type(relay) === "[object String]" ? [relay] : relay;
          if (relay && __type(relay) === "[object Array]") {
             for(var i = 0 ,len = relay.length; i<len;i++){
