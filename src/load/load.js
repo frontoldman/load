@@ -1,3 +1,8 @@
+/**
+	加载与执行的顺序
+	define --->  load
+*/
+
 ;(function(global){
     var __load ,    //加载主函数入口
         __define,   //定义函数 
@@ -27,15 +32,12 @@
 	*解析html文件url
 	*/
 	var prefixUrl;
-	
-	;(function(globalUrl){
-		function dirname(path) {
-			var s = path.match(/.*(?=\/.*$)/);
-			return (s ? s[0] : '.') + '/';
-		}
-		prefixUrl = dirname(globalUrl);	
-		console.log(prefixUrl);
-	})(global.location.href)
+	function dirname(path) {
+		var s = path.match(/.*(?=\/.*$)/);
+		return (s ? s[0] : '.') + '/';
+	}
+	prefixUrl = dirname(global.location.href);	
+
 
    //从seajs抠出来的
     var currentlyAddingScript;
@@ -224,28 +226,36 @@
 
     //二个参数
    var argslength2 = function (funOrObj, relay ,id) {
-		relay = formatURL(relay)
-       if(!relay.length){    //判断依赖是否合理
-           argslength1(funOrObj); 
-           return;
-       }
+		
+		
+		//依赖到这里肯定是有的，所以注释掉
+       //if(!relay.length){    //判断依赖是否合理
+       //    argslength1(funOrObj); 
+       //    return;
+       //}
        //__tempFactory是个临时模块，通过这个理临时模块占位，然后通过这个临时模块带回来url和回调函数，一层一层的
        //递归下去，(其实不是递归，只不过把当前回调传入到下一层去了)
        var deep = { length:0 },__tempFactory = {__$delay$:true};//这是一个神奇的对象
 
        __analyticDefine(__tempFactory,id);            //第一个脚本已经load,需要解析,有依赖，传入一个对象延迟执行
-      
-        for (var i = 0 , len = _len = relay.length; i < len; i++) {               
-           deep[relay[i]] = i;          //顺序传递参数
+		
+		var i = 0,len ;
+		//通过一个异步让模块先解析完成并获得url
+		setTimeout(function(){
+			relay = formatURL(relay,__tempFactory.url);
+			for (len = relay.length; i < len; i++) {               
+			   deep[relay[i]] = i;          //顺序传递参数
 
-           if(__loaderContainer[relay[i]]){                    
-                defineCallback(__loaderContainer[relay[i]],relay[i]);
-           }else{
-                __loadScript(relay[i],function(exports,url){  //需要把所有的exports传入到a的回调中去
-                    defineCallback(exports,url);
-                })
-           }
-        }
+			   if(__loaderContainer[relay[i]]){                    
+					defineCallback(__loaderContainer[relay[i]],relay[i]);
+			   }else{
+					__loadScript(relay[i],function(exports,url){  //需要把所有的exports传入到a的回调中去
+						defineCallback(exports,url);
+					})
+			   }
+			}
+		},0)
+		
        // }
 
         function defineCallback(exports,url){
@@ -274,9 +284,14 @@
     }
 
     //过滤传入，格式化传入的参数
-    function formatURL(relay){
+	/**
+		relay:String||Array 模块的依赖列表
+		originUrl:模块的URL
+	**/
+    function formatURL(relay,originUrl){
 		var currentUrl,
-			_prefixUrl = prefixUrl;
+			//根据originUrl判断是从html页面引入的模块还是从define里面引入的模块
+			_prefixUrl = originUrl?dirname(originUrl):prefixUrl;
         relay = __type(relay) === "[object String]" ? [relay] : relay;
          if (relay && __type(relay) === "[object Array]") {
             for(var i = 0 ,len = relay.length; i<len;i++){
@@ -286,6 +301,8 @@
                     continue;
                 }
 				
+				
+				
 				//转换相对路径为绝对路径
 				if(/^\.\//.test(currentUrl)){//./开头
 					currentUrl = currentUrl.replace(/^\.\//,"");
@@ -294,15 +311,17 @@
 				}else if(/^\.\./.test(currentUrl)){//....../开头
 					var directoryDeep = /(\.+)\.\//.exec(currentUrl)[1].length,//目录深度					
 						newPrefixUrlPattern = new RegExp('(\\\w+\/){'+ directoryDeep +'}$','ig'),
-						theDirectoryNeedToBeReplaced = newPrefixUrlPattern.exec(_prefixUrl)[0];
-						
+						theDirectoryNeedToBeReplaced = newPrefixUrlPattern.exec(_prefixUrl)[0];						
 					_prefixUrl = _prefixUrl.replace(theDirectoryNeedToBeReplaced,'');
 					currentUrl = /\.+\/(.*)$/.exec(currentUrl)[1];
 				}else{
 					_prefixUrl = '';
 				}			
-				//console.log(prefixUrl)
+				//console.log(prefixUrl)					
 				currentUrl = _prefixUrl + currentUrl;
+				
+				
+				
                 relay[i] = /\.\w+\s*$/.test(currentUrl) ? currentUrl : currentUrl + '.js'; 
             }
          }

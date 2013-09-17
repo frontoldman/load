@@ -1,5 +1,5 @@
 define(function(){
 	return {
-		name:'a'
+		name:'c'
 	}
 })
