@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>unit-test</title>
+<style type="text/css">
+
+
+</style>
+<script type="text/javascript" src="../load.js"></script>
+</head>
+
+<body>
+
+	<script>
+		require.openDebug();
+		require('./units',function(unit){
+			var ary = ['aa','bb']
+			unit.each(ary,function(index,num){
+				console.log(index + ":" + num);	
+				if(index == 0){
+					return false
+				}
+			})
+			
+			unit.each({'a':'a','b':'b'},function(index,num){
+				console.log(index + ":" + num);	
+				
+			})
+		})
+	</script>
+</body>
+</html>

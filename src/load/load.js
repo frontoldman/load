@@ -255,7 +255,7 @@
 				//console.log(__loaderContainer[relay[i]])
 				//console.log(relay[i])
 				//console.log(__loaderContainer[relay[i]])
-				//TODO 解决循环依赖
+				
 				
 			   if(module && !module.__$delay$){	//循环依赖的时候 	module：true 	  module.__$delay$:true 
 					defineCallback(module,relay[i]);
@@ -348,11 +348,11 @@
 				}else{
 					_prefixUrl = '';
 				}			
-				//console.log(prefixUrl)					
+			
 				currentUrl = _prefixUrl + currentUrl;
 				
 				
-				
+				//TODO url格式化还要在整理整理，其他的格式比如a?x=1,a#11
                 relay[i] = /\.\w+\s*$/.test(currentUrl) ? currentUrl : currentUrl + '.js'; 
             }
          }
