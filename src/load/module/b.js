@@ -1,5 +1,6 @@
-define('./c',function(a){
+define('./c',function(c){
+	//console.log(a);
 	return {
-		name:'b ' + a.name
+		name:'b ' + c.name
 	}
 })

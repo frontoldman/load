@@ -20,7 +20,7 @@
 		__slice = Array.prototype.slice,
 		__head = document.head || document.getElementsByTagName('head')[0] || document.documentElement; //他们都这么写
 		
-		//这是一个正在加载的模块的列表存储器，用来解决加载相同模块的
+		//这是一个正在加载的模块的列表存储器，用来解决加载相同模块的在很短时间内会出现同时加载的情况
 		__loaderContainer.__TemporaryLoadList = {};
 		
 		//重置console,解决ie6报错
@@ -31,7 +31,7 @@
         }
 	
 	/*
-	*解析html文件url
+	*解析url路径
 	*/
 	var prefixUrl;
 	function dirname(path) {
@@ -81,7 +81,7 @@
         }
 		var url = args[0];
         
-		//判断一个脚本是否已经加载，应该从开始加载的时候锁定，需要解决?????
+		//判断一个脚本是否已经加载，应该从开始加载的时候锁定，需要解决？？：已解决
         url = formatURL(url);//格式化url参数
         var modulesLists = {length:0};
         var lock = false;
@@ -243,29 +243,42 @@
 		
        __analyticDefine(__tempFactory,id);            //第一个脚本已经load,需要解析,有依赖，传入一个对象延迟执行
 		
-		var i = 0,len ,currentLoad;
+		var i = 0,len ,currentLoad,module;
 		//通过一个异步让模块先解析完成并获得url
 		setTimeout(function(){
 			
 			relay = formatURL(relay,__tempFactory.url);
 			for (len = relay.length; i < len; i++) {               
-			   deep[relay[i]] = i;          //顺序传递参数
+				deep[relay[i]] = i;          //顺序传递参数
 				currentLoad = __loaderContainer.__TemporaryLoadList[relay[i]];
-			   if(__loaderContainer[relay[i]]){
-					defineCallback(__loaderContainer[relay[i]],relay[i]);
+				module = __loaderContainer[relay[i]];
+				//console.log(__loaderContainer[relay[i]])
+				//console.log(relay[i])
+				//console.log(__loaderContainer[relay[i]])
+				//TODO 解决循环依赖
+				
+			   if(module && !module.__$delay$){	//循环依赖的时候 	module：true 	  module.__$delay$:true 
+					defineCallback(module,relay[i]);
 			   }else if(currentLoad){
+					//console.log(module + ':loading');
 					//判断这个脚本是不是正在加载，却还没有加载成功，并没有成功解析
 					(function(list_n){
 						var list_n_interval = setInterval(function(){
-													var exports = __loaderContainer[list_n];
-													if(exports){
+												var exports = __loaderContainer[list_n];
+												if(exports){
+													if(exports.__$delay$){//循环依赖会出现有exports,并且__$delay$ = true
+														clearInterval(list_n_interval);//暴力破坏循环依赖
+														return false;
+													}else{
 														clearInterval(list_n_interval);
 														defineCallback(exports,list_n)
 													}
-												},1)						
-					})(relay[i])
-					
+													
+												}
+											},1)						
+					})(relay[i])					
 			   }else{
+					//console.log(module + ':toLoad')
 					__loadScript(relay[i],function(exports,url){  //需要把所有的exports传入到a的回调中去
 						defineCallback(exports,url);
 					})
