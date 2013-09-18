@@ -11,11 +11,17 @@
 </head>
 
 <body>
-
+	
+	<div id="oDiv">
+		<div class="header">1</div>
+		<div class="header">2</div>
+	</div>
+	
 	<script>
 		require.openDebug();
 		require('./sizzle',function(sizzle){
-			//console.log(sizzle)
+			var headers = sizzle('#oDiv .header');
+			//alert(headers.length)
 		})
 	</script>
 </body>

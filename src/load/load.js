@@ -272,8 +272,7 @@
 													}else{
 														clearInterval(list_n_interval);
 														defineCallback(exports,list_n)
-													}
-													
+													}													
 												}
 											},1)						
 					})(relay[i])					

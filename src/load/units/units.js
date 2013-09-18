@@ -93,20 +93,21 @@ define(function(){
 				
 				break;
 			
-			default:break;
+			default:
+				
+				break;
 		}
 		
 		return target;
 	};
 	
-	var target = {'a':3},src = {'a':1,'b':2,'c':[1,2,3,4]};
-	var target = extend(true,target,src);
-	console.log(target.c)
+	
 	
 	
 	units.getType = getType;
 	units.each = each;
 	units.trim = trim;
+	units.extend = extend;
 	
 	return units;
 })
