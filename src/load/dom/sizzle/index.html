@@ -20,7 +20,8 @@
 	<script>
 		require.openDebug();
 		require('./sizzle',function(sizzle){
-			var headers = sizzle('#oDiv .header');
+			//var headers = sizzle('#oDiv .header');
+			console.log(sizzle.units.getType(document.getElementsByTagName('div')))
 			//alert(headers.length)
 		})
 	</script>

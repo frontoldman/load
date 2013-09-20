@@ -2,23 +2,24 @@ define(function(){
 	var units = {}
 	
 	
-	
+	//取得数据类型
 	function getType(obj){
-		return Object.prototype.toString.call(obj);	
+		return Object.prototype.toString.call(obj).slice(8,-1);	
 	}
 	
+	//each
 	function each(obj,callback){
 		var continueLoop ,type = getType(obj),i = 0;
 		if(type === '[object Array]'){
 			for(var len = obj.length;i<len;i++){
-				continueLoop = callback.call(obj[i],i,obj[i]);
+				continueLoop = callback.call(obj[i],i,obj[i],type);
 				if(continueLoop === false){
 					break;
 				}
 			}
-		}else if(type === '[object Object]'){
+		}else if(type === 'Object'){
 			for(i in obj){
-				continueLoop = callback.call(obj[i],i,obj[i]);
+				continueLoop = callback.call(obj[i],i,obj[i],type);
 				if(continueLoop === false){
 					break;
 				}
@@ -26,13 +27,39 @@ define(function(){
 		}
 	}
 	
+	//TODO:没有进行深复制，过滤复杂对象时会有引用的问题
+	//过滤函数,并生成一个新对象返回
+	function filter(obj,callback){
+		var newObj,type = getType(obj);
+		
+
+		each(obj,function(key,value,type){
+			var filterValue = callback(key,value);
+			if(!filterValue){
+				if(type === 'Array'){
+					if(!newObj){
+						newObj = [];
+					}
+					newObj.push(value);
+				}else{
+					if(!newObj){
+						newObj = {};
+					}
+					newObj[key] = value;
+				}
+			}
+		})
+		return newObj ? newObj : null;
+	}
+
+	//去除字符串两端空格
 	function trim(str){
 		return String.prototype.trim ?
 				str.trim():
 				str.replace(/^\s+|\s+$/g,'');
 	}
 	
-	
+	//对象的扩展
 	function extend() {
 		
 		function copy(target,src,isDeepCopy){
@@ -42,16 +69,16 @@ define(function(){
 				
 				each(src,function(key,value){
 
-					if(target[key]){
-						return ;
+					if(target[key]){	//相同key直接覆盖
+						//return ;
 					}
 
 					var type = getType(value),temp;
 					if(isDeepCopy === true && typePattern.test(type)){
 					
-						if(type === '[object Array]'){
+						if(type === 'Array'){
 							temp = [];
-						}else if(type === '[object Object]'){
+						}else if(type === 'Object'){
 							temp = {};
 						}
 						
@@ -73,7 +100,8 @@ define(function(){
 			typePattern = /Array|Object/;//判断是不是可以扩展的元素，只有Array和Object可以扩展
 		
 		switch(len){
-		
+			
+			case 0:
 			case 1:break;
 		
 			case 2:
@@ -83,18 +111,17 @@ define(function(){
 				copy(target,src);
 				
 				break;
-				
-			case 3:
-				isDeepCopy = arguments[0];
-				target = arguments[1];
-				src = arguments[2];
-				
-				copy(target,src,isDeepCopy);
-				
-				break;
 			
 			default:
-				
+				var maxLen;
+				isDeepCopy = arguments[0];
+				//判断第一个参数是否为true,来确定如何为哪个参数扩展那些个对象
+				maxLen = isDeepCopy === true ? 2 : 1 ;
+				target = arguments[maxLen-1];
+				for(i = maxLen; i < len ; i++){
+					copy(target,arguments[i],isDeepCopy);
+				}
+
 				break;
 		}
 		
@@ -108,6 +135,7 @@ define(function(){
 	units.each = each;
 	units.trim = trim;
 	units.extend = extend;
+	units.filter = filter;
 	
 	return units;
 })
