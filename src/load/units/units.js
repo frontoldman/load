@@ -1,7 +1,7 @@
 define(function(){
 	var units = {}
 	
-	
+
 	//取得数据类型
 	function getType(obj){
 		return Object.prototype.toString.call(obj).slice(8,-1);	
@@ -10,7 +10,9 @@ define(function(){
 	//each
 	function each(obj,callback){
 		var continueLoop ,type = getType(obj),i = 0;
-		if(type === '[object Array]'){
+		//判断数组、nodeList的遍历
+	
+		if(type === 'Array' || (type === 'Object' && obj.item)){
 			for(var len = obj.length;i<len;i++){
 				continueLoop = callback.call(obj[i],i,obj[i],type);
 				if(continueLoop === false){
@@ -27,6 +29,8 @@ define(function(){
 		}
 	}
 	
+	
+	
 	//TODO:没有进行深复制，过滤复杂对象时会有引用的问题
 	//过滤函数,并生成一个新对象返回
 	function filter(obj,callback){
@@ -34,9 +38,9 @@ define(function(){
 		
 
 		each(obj,function(key,value,type){
-			var filterValue = callback(key,value);
-			if(!filterValue){
-				if(type === 'Array'){
+			var filterValue = callback.call(this,key,value);
+			if(filterValue === true){
+				if(type === 'Array' || (type === 'Object' && obj.item)){
 					if(!newObj){
 						newObj = [];
 					}
@@ -49,6 +53,7 @@ define(function(){
 				}
 			}
 		})
+
 		return newObj ? newObj : null;
 	}
 
@@ -75,7 +80,6 @@ define(function(){
 
 					var type = getType(value),temp;
 					if(isDeepCopy === true && typePattern.test(type)){
-					
 						if(type === 'Array'){
 							temp = [];
 						}else if(type === 'Object'){

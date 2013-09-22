@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <title>sizzle-test</title>
 <style type="text/css">
-
+	.HEADER{color:red;}
 
 </style>
 <script type="text/javascript" src="../../load.js"></script>
@@ -13,16 +13,21 @@
 <body>
 	
 	<div id="oDiv">
-		<div class="header">1</div>
-		<div class="header">2</div>
+		<div class="header1"><span class="list"></span><span class="list"><span></span></span> </div>
+		<div class="header"><span class="list"></span><span class="list"></span></div>
+		<div class="header111"><span></span></div>
 	</div>
 	
 	<script>
+		
+		
+		
 		require.openDebug();
 		require('./sizzle',function(sizzle){
-			//var headers = sizzle('#oDiv .header');
-			console.log(sizzle.units.getType(document.getElementsByTagName('div')))
-			//alert(headers.length)
+			
+			var headers = sizzle('#oDiv div span');
+			console.log(headers.length);
+
 		})
 	</script>
 </body>

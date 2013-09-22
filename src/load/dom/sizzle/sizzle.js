@@ -1,18 +1,90 @@
 define(['.../units/units'],function(units){
 	
-	var doc = document;
+	var doc = document,
+		concat = Array.prototype.concat,
+		slice = Array.prototype.slice,
+		makeArray = (function(){
+						var makeArrayFn;
+						try{
+							slice.call(document.documentElement.childNodes, 0)[0].nodeType;
+							makeArrayFn = function(obj){
+								return slice.call(obj,0)
+							}
+						}catch(e){
+							makeArrayFn = function(obj){
+								var res = [];
+								for(var i=0,len=obj.length; i<len; i++){
+									res.push(obj[i]);
+								}
+								return res;
+							}
+						}
+						
+						return makeArrayFn;
+					})();
 	
+	//console.log(makeArray)
+	function findClassesAndTagNames(selector,context,callback){
+		var tempNodeCollection,
+			i,
+			len,
+			singleNodeListsGetByClassName;
+		if(context.nodeName){
+			tempNodeCollection = callback(selector,context);
+			//console.log(tempNodeCollection)
+		}else if(context.length){
+		
+			tempNodeCollection = [];
+			//遍历父级NodeList,取得所选标签并且去重
+			for(i = 0,len = context.length;i < len;i++){
+				if(singleNodeListsGetByClassName = callback(selector,context[i])){
+					tempNodeCollection.push(singleNodeListsGetByClassName);
+					
+				}								
+			}
+			tempNodeCollection = concat.apply([],tempNodeCollection);
+			//TODO 去重
+		}
+		
+		return tempNodeCollection ? tempNodeCollection : null;
+	}
 	
 	
 	var patternSelector = {
-		'#(\\\w+)':function(selector,context){
+		'^#(\\\w+)$':function(selector,context){
 						return context.getElementById(selector);
 					},
 					//context：node,nodeList,elementsCollection
-		'\\\.(\\\w+)':function(selector,context){
+		'^\\\.(\\\w+)$':function(selector,context){
+							//判断一个上下文环境是不是一个单独的标签
+							//判断这个对象有没有tagName 
+							return findClassesAndTagNames(selector,context,getByClass);
+						},
+						//tagName 不区分大小写
+		'^([A-Za-z]+)$':function(selector,context){
+							var tempNodeCollection,
+								i,
+								len,
+								singleNodeListsGetByTagName;
+								//console.log(context)
+							if(context.nodeName){
+								tempNodeCollection = context.getElementsByTagName(selector);
+							}else if(context.length){
+								tempNodeCollection = [];
+								//遍历父级NodeList,取得所选标签
+								//console.log(context)
+								for(i = 0,len = context.length;i < len;i++){
+									if(singleNodeListsGetByTagName = context[i].getElementsByTagName(selector)){
 
-						return getByClass(selector,context);
-					}
+										tempNodeCollection.push(makeArray(singleNodeListsGetByTagName))
+										
+									}								
+								}
+								tempNodeCollection = concat.apply([],tempNodeCollection);
+							}
+							//console.log(tempNodeCollection)
+							return tempNodeCollection ? tempNodeCollection : null;
+						}
 	}
 	
 	/**
@@ -35,36 +107,53 @@ define(['.../units/units'],function(units){
 		}else{			
 			var selectorAry = selector.split(/\s+/)
 				,parents = context;
-
+			
 			units.each(selectorAry,function(key,value){
+				//console.log(parents)
 				var selectorPattern,result ;
 				for(var i in patternSelector){
 					selectorPattern = new RegExp(i);
-
+					
 					result = selectorPattern.exec(value);
-					if(result.length >= 2){
+					if(result && result.length >= 2){
 						parents = patternSelector[i](result[1],parents);
+						break;
 					}
-					//alert(result.length)
 				}
+
 			})
 			
+			return parents == context ? null : parents;
 		}
 	}
 	
 	//通过class查找
+	/**
+		className:String class名字
+		context:Node 上下文环境，仅仅是dom,
+	**/
 	function getByClass(className,context){
 
-		var eles;
+		var eles,clsNameAry,i;
 		if(context.getElementsByClassName){
-			eles = context.getElementsByClassName(className);
+			eles = context.getElementsByClassName(className);			
 		}else{
-			eles = context.getElementsyTagName('*');
+			eles = context.getElementsByTagName('*');
 			
-
-			
-		
+			var temp = units.filter(eles,function(key,value){
+				clsNameAry = value.className.split(/\s+/);
+				
+				//class名字 是区分大小写的
+				for(i = 0;i<clsNameAry.length;i++){
+					if(clsNameAry[i] == className){						
+						return true;
+					}
+				}
+			})
+			eles = temp || null;
+					
 		}
+		//console.log(eles)
 		return eles;
 	}
 
