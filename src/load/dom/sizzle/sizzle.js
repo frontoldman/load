@@ -3,8 +3,12 @@ define(['.../units/units'],function(units){
 	var doc = document,
 		concat = Array.prototype.concat,
 		slice = Array.prototype.slice,
-		unique = function(array){
-					
+		//http://www.nowamagic.net/javascript/js_RemoveRepeatElement.php
+		unique = function(arr){
+					for(var i=0;i<arr.length;i++)
+						for(var j=i+1;j<arr.length;j++)
+							if(arr[i]===arr[j]){arr.splice(j,1);j--;}           
+					return arr;
 				},
 		makeArray = (function(){
 						var makeArrayFn;
@@ -126,7 +130,7 @@ define(['.../units/units'],function(units){
 
 			})
 			
-			
+			parents = units.getType(parents) === 'Array' ? unique(parents) : parents;
 			
 			return parents == context ? null : parents;
 		}
