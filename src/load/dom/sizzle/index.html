@@ -14,7 +14,7 @@
 	
 	<div id="oDiv">
 		<div class="header1"><span class="list"></span><span class="list"><span></span></span> </div>
-		<div class="header"><span class="list"></span><span class="list"></span></div>
+		<div class="header"><span class="list"><span class="list"> <span></span></span></span></div>
 		<div class="header111"><span></span></div>
 	</div>
 	
@@ -25,8 +25,8 @@
 		require.openDebug();
 		require('./sizzle',function(sizzle){
 			
-			var headers = sizzle('#oDiv div span');
-			console.log(headers.length);
+			var headers = sizzle('#oDiv span span');
+			console.log(headers);
 
 		})
 	</script>
