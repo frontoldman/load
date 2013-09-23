@@ -25,7 +25,7 @@
 		require.openDebug();
 		require('./sizzle',function(sizzle){
 			
-			var headers = sizzle('span');
+			var headers = sizzle('#oDiv span,#oDiv div');
 			console.log(headers.length);
 
 		})

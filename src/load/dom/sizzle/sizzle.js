@@ -167,8 +167,6 @@ define(['.../units/units'],function(units){
 		}else{
 			
 		}
-
-		alert(11)
 		return temp;
 	}
 
