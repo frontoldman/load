@@ -140,32 +140,11 @@ define(['.../units/units'],function(units){
 		
 		if(doc.querySelectorAll){
 			return context.querySelectorAll(selector);
-<<<<<<< HEAD
+
 		}else{			
-			var selectorAry = selector.split(/\s+/)
-				,parents = context;
-			
-			units.each(selectorAry,function(key,value){
-				//console.log(parents)
-				var selectorPattern,result ;
-				for(var i in patternSelector){
-					selectorPattern = new RegExp(i);
-					
-					result = selectorPattern.exec(value);
-					if(result && result.length >= 2){
-						parents = patternSelector[i](result[1],parents);
-						break;
-					}
-				}
-			})
-			
-			parents = units.getType(parents) === 'Array' ? unique(parents) : parents;
-			
-			return parents == context ? null : parents;
-=======
-		}else{		
+		
 			return splitByComma(selector,context);
->>>>>>> 233b4e741963caffac718b31cac9715710b27913
+
 		}
 	}
 	
