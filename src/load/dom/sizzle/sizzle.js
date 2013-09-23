@@ -140,7 +140,7 @@ define(['.../units/units'],function(units){
 		
 		if(doc.querySelectorAll){
 			return context.querySelectorAll(selector);
-		}else{		
+		}else{	
 			return splitByComma(selector,context);
 		}
 	}
@@ -165,7 +165,7 @@ define(['.../units/units'],function(units){
 			
 		}
 
-		alert(11)
+		
 		return temp;
 	}
 
