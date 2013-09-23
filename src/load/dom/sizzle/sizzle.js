@@ -4,6 +4,7 @@ define(['.../units/units'],function(units){
 		concat = Array.prototype.concat,
 		slice = Array.prototype.slice,
 		//http://www.nowamagic.net/javascript/js_RemoveRepeatElement.php
+		//学到一个快速去重的方法，利用js特性，把数组值赋给对象的key,判断key是否重复，简单类型当用此方法
 		unique = function(arr){
 					for(var i=0;i<arr.length;i++)
 						for(var j=i+1;j<arr.length;j++)
@@ -15,10 +16,15 @@ define(['.../units/units'],function(units){
 						try{
 							slice.call(document.documentElement.childNodes, 0)[0].nodeType;
 							makeArrayFn = function(obj){
-								return slice.call(obj,0)
+								return units.getType(obj) === 'Array' ? obj : slice.call(obj,0);
 							}
 						}catch(e){
 							makeArrayFn = function(obj){
+								
+								if(units.getType(obj) === 'Array'){
+									return obj;
+								}
+								
 								var res = [];
 								for(var i=0,len=obj.length; i<len; i++){
 									res.push(obj[i]);
@@ -30,6 +36,9 @@ define(['.../units/units'],function(units){
 						return makeArrayFn;
 					})();
 	
+	
+	
+	var separatorPattern = /(\w+)[+|>|:]?([.|#]?(\w+))/;
 	
 	//通过class查找
 	/**
@@ -64,20 +73,20 @@ define(['.../units/units'],function(units){
 
 
 
-	function findClassesAndTagNames(selector,context,callback){
+	function findByClass(selector,context){
 		var tempNodeCollection,
 			i,
 			len,
 			singleNodeListsGetByClassName;
 		if(context.nodeName){
-			tempNodeCollection = callback(selector,context);
+			tempNodeCollection = getByClass(selector,context);
 			//console.log(tempNodeCollection)
 		}else if(context.length){
 		
 			tempNodeCollection = [];
 			//遍历父级NodeList,取得所选标签并且去重
 			for(i = 0,len = context.length;i < len;i++){
-				if(singleNodeListsGetByClassName = callback(selector,context[i])){
+				if(singleNodeListsGetByClassName = getByClass(selector,context[i])){
 					tempNodeCollection.push(singleNodeListsGetByClassName);
 					
 				}								
@@ -90,41 +99,43 @@ define(['.../units/units'],function(units){
 	}
 	
 	
-	var patternSelector = {
-		'^#(\\\w+)$':function(selector,context){
-						return context.getElementById(selector);
-					},
-					//context：node,nodeList,elementsCollection
-		'^\\\.(\\\w+)$':function(selector,context){
-							
-							return findClassesAndTagNames(selector,context,getByClass);
-						},
-						//tagName 不区分大小写
-		'^([A-Za-z]+)$':function(selector,context){
-							var tempNodeCollection,
-								i,
-								len,
-								singleNodeListsGetByTagName;
-								//console.log(context)
-							if(context.nodeName){
-								tempNodeCollection = context.getElementsByTagName(selector);
-							}else if(context.length){
-								tempNodeCollection = [];
-								//遍历父级NodeList,取得所选标签
-								//console.log(context)
-								for(i = 0,len = context.length;i < len;i++){
-									if(singleNodeListsGetByTagName = context[i].getElementsByTagName(selector)){
+	function findByTagName(selector,context){
+		var tempNodeCollection,
+			i,
+			len,
+			singleNodeListsGetByTagName;
+			//console.log(context)
+		if(context.nodeName){
+			tempNodeCollection = context.getElementsByTagName(selector);
+		}else if(context.length){
+			tempNodeCollection = [];
+			//遍历父级NodeList,取得所选标签
+			//console.log(context)
+			for(i = 0,len = context.length;i < len;i++){
+				if(singleNodeListsGetByTagName = context[i].getElementsByTagName(selector)){
 
-										tempNodeCollection.push(makeArray(singleNodeListsGetByTagName))
-										
-									}								
-								}
-								tempNodeCollection = concat.apply([],tempNodeCollection);
-							}
-							//console.log(tempNodeCollection)
-							return tempNodeCollection ;
-						}
+					tempNodeCollection.push(makeArray(singleNodeListsGetByTagName))
+					
+				}								
+			}
+			tempNodeCollection = concat.apply([],tempNodeCollection);
+		}
+		//console.log(tempNodeCollection)
+		return tempNodeCollection ;
 	}
+	
+	//主要选择器的映射
+	var patternSelector = {
+		'^#(\\\w+)(.*)':function(selector,context){
+							return context.getElementById(selector);
+						},
+					//context：node,nodeList,elementsCollection
+		'^\\\.(\\\w+)(.*)':findByClass,
+						//tagName 不区分大小写
+		'^([A-Za-z]+)(.*)':findByTagName
+	}
+	
+	
 	
 	/**
 		selector:String css选择器字符串
@@ -137,14 +148,12 @@ define(['.../units/units'],function(units){
 			context = doc;
 		}
 		
+		return splitByComma(selector,context);
 		
 		if(doc.querySelectorAll){
 			return context.querySelectorAll(selector);
-
-		}else{			
-		
+		}else{					
 			return splitByComma(selector,context);
-
 		}
 	}
 	
@@ -154,19 +163,19 @@ define(['.../units/units'],function(units){
 		selector = units.trim(selector);
 		var selectorAry = selector.split(/\,/),temp = [];
 		units.each(selectorAry,function(key,value){
-			temp.push(splitBySpace(value,context))
-		});
-
-		temp = concat.apply([],temp);
-
-		//全部返回数组元素
-		if(units.getType(temp) === 'Array'){
-			temp = unique(temp);
-		}else if(temp === context){
-			temp = [];
-		}else{
 			
-		}
+			var spaceDoms = splitBySpace(value,context)
+			temp.push(makeArray(spaceDoms));
+			
+		});
+		
+		//console.log(concat.apply([],temp)[0])
+		temp = concat.apply([],temp);
+		
+		//全部返回数组元素
+		temp = unique(temp);
+		
+		
 		return temp;
 	}
 
@@ -177,7 +186,7 @@ define(['.../units/units'],function(units){
 			,parents = context;
 		
 		units.each(selectorAry,function(key,value){
-			//console.log(parents)
+			
 			var selectorPattern,result ;
 			for(var i in patternSelector){
 				selectorPattern = new RegExp(i);
@@ -185,19 +194,46 @@ define(['.../units/units'],function(units){
 				result = selectorPattern.exec(value);
 				if(result && result.length >= 2){
 					parents = patternSelector[i](result[1],parents);
+					//还有特殊分隔符
+					if(result.length>=3){
+						parents = splitByFilterSymbol(result[2],parents);
+					}
 					break;
 				}
 			}
 
 		})
 		
-		
-
-		
+		parents = parents === context ? [] : parents;		
 		return parents ;
 	}
 
-
+	//分隔符 + > : ~
+	function splitByFilterSymbol(selector,parents){		
+		var filterSymbolPattern = /[+|>|:|~|.]/,
+			i,
+			len = selector.length,
+			preChar,
+			currentChar,
+			patternResult;
+		
+		for(i = 0;i < len;i++){
+			currentChar = selector[i];
+			patternResult = filterSymbolPattern.exec(currentChar);
+			
+			if(patternResult && patternResult.length){
+				preChar = currentChar;
+				
+			}
+		}
+				
+		return parents;
+	}
+	
+	//.分隔符
+	function splitByPoint(){
+		
+	}
 
 	sizzle.units = units;
 	return  sizzle;
