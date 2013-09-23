@@ -49,7 +49,7 @@ define(['.../units/units'],function(units){
 
 		var eles,clsNameAry,i;
 		if(context.getElementsByClassName){
-			eles = context.getElementsByClassName(className);			
+			eles = makeArray(context.getElementsByClassName(className));			
 		}else{
 			eles = context.getElementsByTagName('*');
 			
@@ -63,6 +63,7 @@ define(['.../units/units'],function(units){
 					}
 				}
 			})
+
 			eles = temp || null;
 					
 		}
@@ -94,7 +95,7 @@ define(['.../units/units'],function(units){
 			tempNodeCollection = concat.apply([],tempNodeCollection);
 			//TODO 去重
 		}
-		
+		//console.log(tempNodeCollection)
 		return tempNodeCollection ;
 	}
 	
@@ -127,7 +128,9 @@ define(['.../units/units'],function(units){
 	//主要选择器的映射
 	var patternSelector = {
 		'^#(\\\w+)(.*)':function(selector,context){
-							return context.getElementById(selector);
+							var tempDomById = context.getElementById(selector);
+							tempDomById = tempDomById ? [tempDomById] : [];
+							return tempDomById;
 						},
 					//context：node,nodeList,elementsCollection
 		'^\\\.(\\\w+)(.*)':findByClass,
@@ -197,42 +200,91 @@ define(['.../units/units'],function(units){
 					//还有特殊分隔符
 					if(result.length>=3){
 						parents = splitByFilterSymbol(result[2],parents);
+						//console.log(parents)
 					}
+
 					break;
 				}
 			}
 
 		})
 		
+
 		parents = parents === context ? [] : parents;		
 		return parents ;
 	}
 
+
+	var symbolSelector = {
+		'+':splitByPlus
+	}
+
 	//分隔符 + > : ~
-	function splitByFilterSymbol(selector,parents){		
+	/**
+		selector:string 选择器
+		domsLocated：Array  已经被选中的标签数组
+	**/
+	function splitByFilterSymbol(selector,domsLocated){		
 		var filterSymbolPattern = /[+|>|:|~|.]/,
 			i,
 			len = selector.length,
-			preChar,
+			preChar ,
 			currentChar,
-			patternResult;
+			patternResult,
+			_tempSelectorStr;
 		
+
+		//console.log(domsLocated)
 		for(i = 0;i < len;i++){
 			currentChar = selector[i];
 			patternResult = filterSymbolPattern.exec(currentChar);
 			
-			if(patternResult && patternResult.length){
-				preChar = currentChar;
+			//匹配到了一个特殊字符或者到了字符串的最后都要去尝试过滤一下
+			if((patternResult && patternResult.length) || i === len-1){
+
+				if(preChar){
+
+					_tempSelectorStr = selector.slice(preChar.index,i+1);
+					console.log(patternResult)
+					console.log(preChar)
+					console.log(i)
+					console.log(_tempSelectorStr)
+					domsLocated = symbolSelector[preChar.charCode](_tempSelectorStr,domsLocated);
+
+				}
+
+				if(i === len-1) break;
+
+				preChar = {
+					index:i+1,
+					charCode:patternResult[0]
+				}
 				
 			}
 		}
-				
-		return parents;
+		//console.log(domsLocated)		
+		return domsLocated;
 	}
 	
 	//.分隔符
 	function splitByPoint(){
 		
+	}
+
+	//+分隔符
+	function splitByPlus(selector,domsLocated){
+		return units.filter(domsLocated,function(key,value){
+			console.log(selector)
+			return true;
+		})
+	}
+
+
+
+
+	//dom查找方法
+	function next(){
+
 	}
 
 	sizzle.units = units;
