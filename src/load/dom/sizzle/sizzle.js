@@ -266,6 +266,12 @@ define(['.../units/units'],function(units){
 					//只要.不在第一个或者.之前没有特殊字符选择器,就跳出当前循环
 					if( i == 0 || !newSymbolPattern.test(selector.charAt(i-1))){
 						subEndIndex = i-1;	
+						if(i == 0){
+							preChar = {
+								index:subEndIndex,
+								charCode:patternResult[0]
+							}
+						}
 					}else{
 						continue;
 					}
@@ -281,6 +287,10 @@ define(['.../units/units'],function(units){
 					console.log(_tempSelectorStr)
 					//console.log(domsLocated)
 					//console.log(preChar.charCode)
+					if(!_tempSelectorStr){
+						continue;
+					}
+					
 					domsLocated = symbolSelector[preChar.charCode](_tempSelectorStr,domsLocated);
 					if(!domsLocated.length){
 						break;
