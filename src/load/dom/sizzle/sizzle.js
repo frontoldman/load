@@ -266,7 +266,7 @@ define(['.../units/units'],function(units){
 					//只要.不在第一个或者.之前没有特殊字符选择器,就跳出当前循环
 					if( i == 0 || !newSymbolPattern.test(selector.charAt(i-1))){
 						subEndIndex = i-1;	
-						if(i == 0){
+						if(i == 0){//解决以.开头没法分析错误的bug
 							preChar = {
 								index:subEndIndex,
 								charCode:patternResult[0]
@@ -281,15 +281,12 @@ define(['.../units/units'],function(units){
 					
 				}
 				
-				if(preChar){		
+				if(preChar && i){		
 					
 					_tempSelectorStr = selector.slice(preChar.index+1,i === len-1 ? len : i);
 					console.log(_tempSelectorStr)
 					//console.log(domsLocated)
 					//console.log(preChar.charCode)
-					if(!_tempSelectorStr){
-						continue;
-					}
 					
 					domsLocated = symbolSelector[preChar.charCode](_tempSelectorStr,domsLocated);
 					if(!domsLocated.length){
