@@ -227,7 +227,8 @@ define(['.../units/units'],function(units){
 		'+':splitByPlus,
 		'>':splitByAngleBrackets,
 		'~':splitByWave,
-		'.':splitByPoint
+		'.':splitByPoint,
+		':':splitByColon
 	}
 
 	//分隔符 + > ~
@@ -280,7 +281,7 @@ define(['.../units/units'],function(units){
 				if(preChar && i){		
 					
 					_tempSelectorStr = selector.slice(preChar.index+1,i === len-1 ? len : i);
-					console.log(_tempSelectorStr)
+					//console.log(_tempSelectorStr)
 					//console.log(domsLocated)
 					//console.log(preChar.charCode)
 					
@@ -382,8 +383,35 @@ define(['.../units/units'],function(units){
 		return temp;
 	}
 	
-	var judgementIdCassTagPattern = /^([.|#])?(\w+)/; //用来检测id和class和tagName,判断array[2] === '.|#';
+	function splitByColon(selector,domsLocated){
 
+		console.log(selector)
+		
+
+		return domsLocated;
+
+	}
+
+	
+	//基本选择器
+	var colonBasicFilters = {
+		'even':function(domsLocated,execAry){},
+		'odd':function(domsLocated,execAry){},
+		'first':function(domsLocated,execAry){},
+		'last':function(domsLocated,execAry){},
+
+
+		'eq\\\((\d+)\\\)':function(domsLocated,execAry){},		
+		'gt\\\((\d+)\\\)':function(domsLocated,execAry){},
+		'lt\\\((\d+)\\\)':function(domsLocated,execAry){},
+
+		'not\\\((\w+)\\\)':function(domsLocated,execAry){}
+	}
+
+	//子元素选择器
+	var colonChildrenFilters = {
+		'first-child':function(domsLocated,execAry){},
+	}
 
 	//dom查找方法
 	function next(dom,sign){
@@ -437,6 +465,8 @@ define(['.../units/units'],function(units){
 		return children;
 	}
 	
+	var judgementIdCassTagPattern = /^([.|#])?(\w+)/; //用来检测id和class和tagName,判断array[2] === '.|#';
+
 	//特征过滤
 	function characteristicsFilter(sign,dom){
 		var selectorVariety = judgementIdCassTagPattern.exec(sign);
@@ -450,8 +480,7 @@ define(['.../units/units'],function(units){
 							dom = null;
 						}
 						break;
-				case ':':
-						break;
+				
 				default:if(!checkTagName(selectorVariety[2],dom)){
 							dom = null;	
 						}
