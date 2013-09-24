@@ -275,10 +275,6 @@ define(['.../units/units'],function(units){
 					}else{
 						continue;
 					}
-				}else if(currentChar === ':'){
-					
-					
-					
 				}
 				
 				if(preChar && i){		
@@ -453,6 +449,8 @@ define(['.../units/units'],function(units){
 				case '.':if(!hasClass(selectorVariety[2],dom)){
 							dom = null;
 						}
+						break;
+				case ':':
 						break;
 				default:if(!checkTagName(selectorVariety[2],dom)){
 							dom = null;	
