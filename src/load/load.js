@@ -26,7 +26,9 @@
 		//重置console,解决ie6报错
         if(!global.console){
              global.console = {
-                log:function(){}
+                log:function(msg){
+					alert(msg)
+				}
              }
         }
 	

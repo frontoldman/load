@@ -13,14 +13,18 @@
 <body>
 	
 	<div id="oDiv">
+		
 		<div class="header1"><span class="list"></span><span class="list"><span></span></span> </div>
-		<div class="header"></div>
+		<div class="header name"><span>innosnap</span></div>
 		<div class="header"><span class="list"><span class="list"> <span></span></span></span></div>
-		<p></p>
+		<p><span></span></p>
+		<div class="header111 name"><span></span></div>
+		<p>1</p>
+		<p class="p2">2</p>
+		<p>3</p>
 		<div class="header111"><span></span></div>
-		<p></p>
-		<p></p>
-		<p></p>
+		<p>2</p>
+		<p>3</p>
 	</div>
 	
 	<script>
@@ -28,11 +32,10 @@
 		
 		
 		require.openDebug();
-		require('./sizzle',function(sizzle){
-			
-			var headers = sizzle('#oDiv .header+p');
+		require('./sizzle',function(sizzle){			
+			var headers = sizzle('#oDiv div.header.name');
 			console.log(headers.length);
-
+			//console.log(headers[0].tagName);
 		})
 	</script>
 </body>
