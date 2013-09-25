@@ -53,8 +53,8 @@ define(function(){
 				}
 			}
 		})
-
-		return newObj ? newObj : null;
+		
+		return newObj ? newObj : type === 'Array' ? [] : {};
 	}
 
 	//去除字符串两端空格

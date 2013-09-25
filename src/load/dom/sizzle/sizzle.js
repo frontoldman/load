@@ -66,7 +66,7 @@ define(['.../units/units'],function(units){
 				}
 			})
 
-			eles = temp || null;
+			eles = temp ;
 					
 		}
 		//console.log(eles)
@@ -154,8 +154,16 @@ define(['.../units/units'],function(units){
 		if(!context){
 			context = doc;
 		}
+			
+		var result ;	
 		
-		return splitByComma(selector,context);
+		//不用querySelectorAll，因为有一些选择器css3本身都不支持，期待选择器的进步
+		try{
+			result = splitByComma(selector,context);
+		}catch(e){
+			throw 'Using the wrong selector:' + selector
+		}
+		return result;
 		
 		if(doc.querySelectorAll){
 			return context.querySelectorAll(selector);
@@ -228,7 +236,8 @@ define(['.../units/units'],function(units){
 		'>':splitByAngleBrackets,
 		'~':splitByWave,
 		'.':splitByPoint,
-		':':splitByColon
+		':':splitByColon,
+		'[':splitByBracket
 	}
 
 	//分隔符 + > ~
@@ -238,8 +247,8 @@ define(['.../units/units'],function(units){
 	**/
 	function splitByFilterSymbol(selector,domsLocated){
 		
-		var newSymbolPattern = /[+|>|~|.|:]/,
-			filterSymbolPattern = /[.|:]/,
+		var newSymbolPattern = /[+|>|~|.|:|\[|\]]/,
+			filterSymbolPattern = /[+|>|~|.|:]/,
 			i,
 			len = selector.length,
 			preChar ,
@@ -247,7 +256,9 @@ define(['.../units/units'],function(units){
 			patternResult,
 			_tempSelectorStr,
 			subEndIndex,
-			subEnd;
+			subEnd,
+			subStartChar,
+			bracket;
 		
 		//selector = new String(selector)
 		//console.log(domsLocated)
@@ -260,14 +271,34 @@ define(['.../units/units'],function(units){
 			if((patternResult && patternResult.length) || i === len-1){
 				subEndIndex = i;
 				
-			
+				
+				//[]也就是属性选择器要单独考虑
+				//从'['开始直到匹配到']'结束，不管中间有什么都忽略
+				if(currentChar === '['){
+					bracket = true;
+					preChar = {
+								index:subEndIndex-1,
+								charCode:patternResult[0]
+							}
+				}
+				
+				if(currentChar === ']'){
+					bracket = false;
+					
+				}
+				
+				if(bracket){
+					continue;
+				}
 				
 				//连接起来的.操作符比较特殊，需要分类操作
 				if(currentChar === '.'){
 					//只要.不在第一个或者.之前没有特殊字符选择器,就跳出当前循环
-					if( i == 0 || !newSymbolPattern.test(selector.charAt(i-1))){
+					subStartChar = selector.charAt(i-1)
+					console.log(subStartChar)
+					if( i === 0 || subStartChar === ']' || !filterSymbolPattern.test(subStartChar)){
 						subEndIndex = i-1;	
-						if(i == 0){//解决以.开头没法分析错误的bug
+						if(i == 0 || subStartChar === ']'){//解决以.开头没法分析错误的bug
 							preChar = {
 								index:subEndIndex,
 								charCode:patternResult[0]
@@ -280,17 +311,29 @@ define(['.../units/units'],function(units){
 				
 				if(preChar && i){		
 					
-					_tempSelectorStr = selector.slice(preChar.index+1,i === len-1 ? len : i);
-					//console.log(_tempSelectorStr)
+					if(i == len-1 ){
+						subEnd = len;
+					}else if(subStartChar == ']'){
+						subEnd = i+1;
+					}else{
+						subEnd = i
+					}
+					//console.log(subStartChar)
+					_tempSelectorStr = selector.slice(preChar.index+1,subEnd);
+					console.log(_tempSelectorStr)
 					//console.log(domsLocated)
 					//console.log(preChar.charCode)
 					
 					domsLocated = symbolSelector[preChar.charCode](_tempSelectorStr,domsLocated);
-					if(!domsLocated.length){
+					if(!domsLocated || !domsLocated.length){
 						break;
 					}
 				}
 				
+				if(currentChar === ']'){
+					preChar = null;	
+					continue;
+				}
 				
 				
 				if(i === len-1) break;
@@ -383,6 +426,13 @@ define(['.../units/units'],function(units){
 		return temp;
 	}
 	
+	//[]
+	function splitByBracket(selector,domsLocated){
+		console.log(selector)
+		return domsLocated
+		
+	}
+	
 	//：过滤选择器，有选择性的支持了常用的选择器，一些可能永远不会被用到的选择器就不要也罢
 	function splitByColon(selector,domsLocated){
 
@@ -392,7 +442,7 @@ define(['.../units/units'],function(units){
 			currentColonFilters ,
 			currentFilter ,
 			execAry,
-			temp;
+			temp = [];
 
 		for(i in colonFilters){
 
@@ -402,6 +452,8 @@ define(['.../units/units'],function(units){
 				
 				execAry = (new RegExp(j)).exec(selector);
 				
+				//console.log(new RegExp(j));
+				//console.log(execAry);
 				if(execAry && execAry.length){
 					currentFilter = currentColonFilters[j];
 					temp = currentFilter(domsLocated,execAry);
@@ -413,14 +465,14 @@ define(['.../units/units'],function(units){
 		}
 
 
-		return domsLocated;
+		return temp;
 
 	}
 
 	
 	//基本筛选器
 	var colonBasicFilters = {
-		'even':function(domsLocated,execAry){
+		'\\beven\\b':function(domsLocated,execAry){	//偶数
 					var evenChild ;
 					evenChild = units.filter(domsLocated,function(key,value){
 						if(key%2 === 0){
@@ -429,7 +481,7 @@ define(['.../units/units'],function(units){
 					})
 					return evenChild ;
 				},
-		'odd':function(domsLocated,execAry){
+		'\\bodd\\b':function(domsLocated,execAry){	//奇数
 							var oddChild ;
 							oddChild = units.filter(domsLocated,function(key,value){
 								if(key%2 != 0){
@@ -438,45 +490,209 @@ define(['.../units/units'],function(units){
 							})
 							return oddChild ;
 						},
-		'first\\\s*$':function(domsLocated,execAry){
+		'\\bfirst\\b':function(domsLocated,execAry){
 							var first_child ;
-							first_child = slice.call(domsLocated,0,1)
+							first_child = slice.call(domsLocated,0,1);
 
 							return first_child ;
 						},
-		'last':function(domsLocated,execAry){},
+		'\\blast\\b':function(domsLocated,execAry){
+						var last_child ;
+						last_child = slice.call(domsLocated,domsLocated.length-2,domsLocated.length-1);
+					
+						return last_child ;
+					},
 
 
-		'eq\\\((\d+)\\\)':function(domsLocated,execAry){},		
-		'gt\\\((\d+)\\\)':function(domsLocated,execAry){},
-		'lt\\\((\d+)\\\)':function(domsLocated,execAry){},
-
-		'not\\\((\w+)\\\)':function(domsLocated,execAry){}
+		'\\beq\\\((\\\d+)\\\)\\b':function(domsLocated,execAry){
+										var eqChild , index;
+										if(execAry.length>1){
+											index = execAry[1]*1;
+										}	
+										eqChild = slice.call(domsLocated , index , index+1);
+										return eqChild;
+									},		
+		'\\bgt\\\((\\\d+)\\\)\\b':function(domsLocated,execAry){
+										var gtChild , index;
+										if(execAry.length>1){
+											index = execAry[1]*1;
+										}	
+										gtChild = slice.call(domsLocated , index , domsLocated.length-1);
+										return gtChild;
+									},
+		'\\blt\\\((\\\d+)\\\)\\b':function(domsLocated,execAry){
+										var ltChild , index;
+										if(execAry.length>1){
+											index = execAry[1]*1;
+										}	
+										ltChild = slice.call(domsLocated , 0 , index);
+										return ltChild;
+									},
+		//not很复杂，待以后
+		'\\bnot\\\((\\\.+)\\\)\\b':function(domsLocated,execAry){
+										var notChild , selector;
+										
+										//console.log(execAry)
+										
+										notChild = units.filter(domsLocated,function(key,value){
+											return true;
+										})
+										
+										return notChild
+									}
 	}
-
-	//子元素筛选器
+		
+		
+		
+	//子元素筛选器，不是筛选他们的子元素，而是自己作为子元素被筛选。。。。
 	var colonChildrenFilters = {
-		'first-child':function(domsLocated,execAry){},
-		'last-child':function(domsLocated,execAry){},
-		'nth-child\\\((\w+)\\\)':function(domsLocated,execAry){}
+		'\\bfirst-child\\b':function(domsLocated,execAry){
+								var childSet = [];		
+								units.each(domsLocated,function(key,value){
+									var childs = children(value.parentNode);
+									if(childs[0] == value){
+										childSet.push(value)
+									}
+								})
+														
+								return childSet;
+							},
+		'\\blast-child\\b':function(domsLocated,execAry){
+								var childSet = [],len,childs ;		
+								units.each(domsLocated,function(key,value){
+									childs = children(value.parentNode);
+									len = childs.length;
+									if(childs[len-1] == value){
+										childSet.push(value)
+									}
+								})
+														
+								return childSet;
+							},
+					//匹配当前元素是其父元素的第几个标签，从下标1开始的，很奇怪
+		'\\bnth-child\\\((\\\w+)\\\)\\b':function(domsLocated,execAry){
+												var childSet = [],
+													childs,
+													location,
+													locationPattern = /(even)|(odd)|(\b\d+\b)|(?:(\d+)\w+)/i,
+													locationPatternExecResult;
+												
+												location = execAry[1];
+												locationPatternExecResult = locationPattern.exec(location);	
+												
+												console.log(locationPatternExecResult)
+												units.each(domsLocated,function(domkey,domValue){
+													
+													childs = children(domValue.parentNode);
+													
+													if(locationPatternExecResult){
+														units.each(locationPatternExecResult,function(key,value){
+															if(key !=0 && value){
+																switch(value){
+																	case 'even':
+																				units.each(childs,function(index,sibling){
+																					if(sibling == domValue && (index+1)%2 === 0){
+																						//console.log(index)
+																						childSet.push(domValue);
+																						return false;
+																					}
+																				})
+																				break;
+																	case 'odd':
+																				units.each(childs,function(index,sibling){
+																					if(sibling == domValue && (index+1)%2 != 0){
+																						childSet.push(domValue);
+																						return false;
+																					}
+																				})
+																				break;
+																	default:
+																			units.each(childs,function(index,sibling){
+																				if(sibling == domValue){
+																					if(key == 3 && (index+1) == value){
+																						childSet.push(domValue);
+																					}
+																					
+																					
+																					if(key == 4 && (index+1)%value === 0){
+																						childSet.push(domValue);
+																					}
+																					
+																					return false;
+																				}
+																			})
+																			break;
+																}
+																return false;
+															}
+														})
+													}
+												})
+												
+												
+													
+												
+												
+												return childSet;
+											}
 	}
-
+		
+	
+		
 	//表单筛选器
 	var colonFormFilters = {
-		'button':function(domsLocated,execAry){},
-		'checkbox':function(domsLocated,execAry){},
-		'checked':function(domsLocated,execAry){},
-		'disabled':function(domsLocated,execAry){},
-		'enabled':function(domsLocated,execAry){},
-		'file':function(domsLocated,execAry){},
-		'image':function(domsLocated,execAry){},
-		'input':function(domsLocated,execAry){},
-		'password':function(domsLocated,execAry){},
-		'radio':function(domsLocated,execAry){},
-		'reset':function(domsLocated,execAry){},
-		'selected':function(domsLocated,execAry){},
-		'submit':function(domsLocated,execAry){},
-		'text':function(domsLocated,execAry){}
+		'\\bbutton\\b':function(domsLocated,execAry){
+							var temp = [],
+								tagName,
+								type;
+							//console.log(domsLocated)
+							temp = units.filter(domsLocated,function(key,value){
+								tagName = value.tagName;
+
+								if(/(input)|(button)/i.test(tagName)){									
+									//ie不显式设置type的值，会有不一样的行为，但是不应该修复，不一样的type恰恰是正确的行为
+									type = value.type.toLowerCase;
+
+									if(type == 'button'){
+										return true;
+									}
+								}
+							})
+				
+							return temp;
+						},
+		'\\bcheckbox\\b':function(domsLocated,execAry){
+							var temp = [],
+								tagName,
+								type;
+							temp = units.filter(domsLocated,function(key,value){
+								tagName = value.tagName;
+
+								if(/input/i.test(tagName)){									
+									
+									type = value.type.toLowerCase;
+
+									if(type == 'checkbox'){
+										return true;
+									}
+								}
+							})
+							return temp;
+						}
+		/**   暂时注释掉，可能不太会用的到
+		'\\bchecked\\b':function(domsLocated,execAry){},
+		'\\bdisabled\\b':function(domsLocated,execAry){},
+		'\\benabled\\b':function(domsLocated,execAry){},
+		'\\bfile\\b':function(domsLocated,execAry){},
+		'\\bimage\\b':function(domsLocated,execAry){},
+		'\\binput\\b':function(domsLocated,execAry){},
+		'\\bpassword\\b':function(domsLocated,execAry){},
+		'\\bradio\\b':function(domsLocated,execAry){},
+		'\\breset\\b':function(domsLocated,execAry){},
+		'\\bselected\\b':function(domsLocated,execAry){},
+		'\\bsubmit\\b':function(domsLocated,execAry){},
+		'\\btext\\b':function(domsLocated,execAry){}
+		**/
 	}
 
 	var colonFilters = {
@@ -516,7 +732,7 @@ define(['.../units/units'],function(units){
 			}
 			nextSibling = next(nextSibling)
 		}
-		console.log(nextSibilngs)		
+		//console.log(nextSibilngs)		
 		return nextSibilngs;
 	}
 	
@@ -586,6 +802,12 @@ define(['.../units/units'],function(units){
 	}
 	
 	//########################################################
+	
+	
+	function getAttribute(dom,attrStr){
+		return dom.getAttribute(attrStr)
+	}
+	
 	sizzle.units = units;
 	return  sizzle;
 })

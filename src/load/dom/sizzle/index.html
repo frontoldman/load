@@ -17,23 +17,29 @@
 		<div class="header1"><span class="list"></span><span class="list"><span></span></span> </div>
 		<div class="header name"><span>innosnap</span></div>
 		<div class="header"><span class="list"><span class="list"> <span></span></span></span></div>
-		<p><span></span></p>
+		<p class="p1" name="par"><span></span></p>
 		<div class="header111 name"><span></span></div>
-		<p>1</p>
-		<p class="p2">2</p>
-		<p>3</p>
+		<p class="p2">1</p>
+		<p class="p3">2</p>
+		<p class="p4">3</p>
 		<div class="header111"><span></span></div>
-		<p>2</p>
-		<p>3</p>
+		<p class="p5">2</p>
+		<p class="p6">3</p>
+		<input id="b1"  value="点击"/>
+		<button id="b2" >点击</button>
 	</div>
 	
 	<script>
 		
 		
+		var b2 = document.getElementById('b2')
 		
+		//alert(b2.getAttribute('type'))
+		//alert(b2.type)
 		require.openDebug();
 		require('./sizzle',function(sizzle){			
-			var headers = sizzle('#oDiv div:even+p');
+			var headers = sizzle('#oDiv p[name=par].p1');
+			console.log(headers)
 			console.log(headers.length);
 			//console.log(headers[0].tagName);
 		})
