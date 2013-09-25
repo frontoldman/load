@@ -383,21 +383,67 @@ define(['.../units/units'],function(units){
 		return temp;
 	}
 	
+	//：过滤选择器，有选择性的支持了常用的选择器，一些可能永远不会被用到的选择器就不要也罢
 	function splitByColon(selector,domsLocated){
 
 		console.log(selector)
 		
+		var i , j ,
+			currentColonFilters ,
+			currentFilter ,
+			execAry,
+			temp;
+
+		for(i in colonFilters){
+
+			currentColonFilters = colonFilters[i];
+
+			for(j in currentColonFilters){
+				
+				execAry = (new RegExp(j)).exec(selector);
+				
+				if(execAry && execAry.length){
+					currentFilter = currentColonFilters[j];
+					temp = currentFilter(domsLocated,execAry);
+					return temp;					
+				}
+			}
+
+			
+		}
+
 
 		return domsLocated;
 
 	}
 
 	
-	//基本选择器
+	//基本筛选器
 	var colonBasicFilters = {
-		'even':function(domsLocated,execAry){},
-		'odd':function(domsLocated,execAry){},
-		'first':function(domsLocated,execAry){},
+		'even':function(domsLocated,execAry){
+					var evenChild ;
+					evenChild = units.filter(domsLocated,function(key,value){
+						if(key%2 === 0){
+							return true;
+						}
+					})
+					return evenChild ;
+				},
+		'odd':function(domsLocated,execAry){
+							var oddChild ;
+							oddChild = units.filter(domsLocated,function(key,value){
+								if(key%2 != 0){
+									return true;
+								}
+							})
+							return oddChild ;
+						},
+		'first\\\s*$':function(domsLocated,execAry){
+							var first_child ;
+							first_child = slice.call(domsLocated,0,1)
+
+							return first_child ;
+						},
 		'last':function(domsLocated,execAry){},
 
 
@@ -408,9 +454,35 @@ define(['.../units/units'],function(units){
 		'not\\\((\w+)\\\)':function(domsLocated,execAry){}
 	}
 
-	//子元素选择器
+	//子元素筛选器
 	var colonChildrenFilters = {
 		'first-child':function(domsLocated,execAry){},
+		'last-child':function(domsLocated,execAry){},
+		'nth-child\\\((\w+)\\\)':function(domsLocated,execAry){}
+	}
+
+	//表单筛选器
+	var colonFormFilters = {
+		'button':function(domsLocated,execAry){},
+		'checkbox':function(domsLocated,execAry){},
+		'checked':function(domsLocated,execAry){},
+		'disabled':function(domsLocated,execAry){},
+		'enabled':function(domsLocated,execAry){},
+		'file':function(domsLocated,execAry){},
+		'image':function(domsLocated,execAry){},
+		'input':function(domsLocated,execAry){},
+		'password':function(domsLocated,execAry){},
+		'radio':function(domsLocated,execAry){},
+		'reset':function(domsLocated,execAry){},
+		'selected':function(domsLocated,execAry){},
+		'submit':function(domsLocated,execAry){},
+		'text':function(domsLocated,execAry){}
+	}
+
+	var colonFilters = {
+		colonBasicFilters : colonBasicFilters,
+		colonChildrenFilters : colonChildrenFilters,
+		colonFormFilters : colonFormFilters
 	}
 
 	//dom查找方法
@@ -449,12 +521,13 @@ define(['.../units/units'],function(units){
 	}
 	
 	function children(dom,sign){
-		var children = dom.children ;
-		
-		children = makeArray(children);
+		var _children = dom.children ;
+		//console.log(_children)
+		_children = _children.length ? _children : [];
+		_children = makeArray(_children);
 		
 		if(sign){
-			children = units.filter(children,function(key,value){
+			_children = units.filter(_children,function(key,value){
 				var isSuccessDom = characteristicsFilter(sign,value);
 				if(isSuccessDom != null){
 					return true;
@@ -462,7 +535,7 @@ define(['.../units/units'],function(units){
 			})
 		}
 				
-		return children;
+		return _children;
 	}
 	
 	var judgementIdCassTagPattern = /^([.|#])?(\w+)/; //用来检测id和class和tagName,判断array[2] === '.|#';
