@@ -1,3 +1,10 @@
+/**
+	实现思路
+		1、”,“拆分选择器字符串
+		2、空格拆分字符串进行大范围筛选
+		3、特殊字符过滤已经筛选到的dom,返回数组。
+**/
+
 define(['.../units/units'],function(units){
 	
 	var doc = document,
@@ -494,7 +501,7 @@ define(['.../units/units'],function(units){
 			for(j in currentColonFilters){
 				
 				execAry = (new RegExp(j)).exec(selector);
-				
+				//console.log(j)
 				//console.log(new RegExp(j));
 				//console.log(execAry);
 				if(execAry && execAry.length){
@@ -515,7 +522,7 @@ define(['.../units/units'],function(units){
 	
 	//基本筛选器
 	var colonBasicFilters = {
-		'\\beven\\b':function(domsLocated,execAry){	//偶数
+		'^even$':function(domsLocated,execAry){	//偶数
 					var evenChild ;
 					evenChild = units.filter(domsLocated,function(key,value){
 						if(key%2 === 0){
@@ -524,7 +531,7 @@ define(['.../units/units'],function(units){
 					})
 					return evenChild ;
 				},
-		'\\bodd\\b':function(domsLocated,execAry){	//奇数
+		'^odd$':function(domsLocated,execAry){	//奇数
 							var oddChild ;
 							oddChild = units.filter(domsLocated,function(key,value){
 								if(key%2 != 0){
@@ -533,21 +540,22 @@ define(['.../units/units'],function(units){
 							})
 							return oddChild ;
 						},
-		'\\bfirst\\b':function(domsLocated,execAry){
+		'^first$':function(domsLocated,execAry){
+							//console.log(execAry)
 							var first_child ;
 							first_child = slice.call(domsLocated,0,1);
-
+							//console.log(domsLocated)
 							return first_child ;
 						},
-		'\\blast\\b':function(domsLocated,execAry){
+		'^last$':function(domsLocated,execAry){
 						var last_child ;
-						last_child = slice.call(domsLocated,domsLocated.length-2,domsLocated.length-1);
+						last_child = slice.call(domsLocated,domsLocated.length-1,domsLocated.length);
 					
 						return last_child ;
 					},
 
 
-		'eq\\\((\\\d+)\\\)':function(domsLocated,execAry){
+		'^eq\\\((\\\d+)\\\)$':function(domsLocated,execAry){
 										//console.log(domsLocated+'eq')
 										var eqChild , index;
 										if(execAry.length>1){
@@ -556,7 +564,7 @@ define(['.../units/units'],function(units){
 										eqChild = slice.call(domsLocated , index , index+1);
 										return eqChild;
 									},		
-		'gt\\\((\\\d+)\\\)':function(domsLocated,execAry){
+		'^gt\\\((\\\d+)\\\)$':function(domsLocated,execAry){
 										var gtChild , index;
 										if(execAry.length>1){
 											index = execAry[1]*1;
@@ -564,7 +572,7 @@ define(['.../units/units'],function(units){
 										gtChild = slice.call(domsLocated , index , domsLocated.length-1);
 										return gtChild;
 									},
-		'lt\\\((\\\d+)\\\)':function(domsLocated,execAry){
+		'^lt\\\((\\\d+)\\\)$':function(domsLocated,execAry){
 										var ltChild , index;
 										if(execAry.length>1){
 											index = execAry[1]*1;
@@ -590,10 +598,11 @@ define(['.../units/units'],function(units){
 		
 	//子元素筛选器，不是筛选他们的子元素，而是自己作为子元素被筛选。。。。
 	var colonChildrenFilters = {
-		'\\bfirst-child\\b':function(domsLocated,execAry){
+		'^first-child$':function(domsLocated,execAry){
 								var childSet = [];		
 								units.each(domsLocated,function(key,value){
 									var childs = children(value.parentNode);
+									
 									if(childs[0] == value){
 										childSet.push(value)
 									}
@@ -601,7 +610,7 @@ define(['.../units/units'],function(units){
 														
 								return childSet;
 							},
-		'\\blast-child\\b':function(domsLocated,execAry){
+		'^last-child$':function(domsLocated,execAry){
 								var childSet = [],len,childs ;		
 								units.each(domsLocated,function(key,value){
 									childs = children(value.parentNode);
@@ -614,7 +623,7 @@ define(['.../units/units'],function(units){
 								return childSet;
 							},
 					//匹配当前元素是其父元素的第几个标签，从下标1开始的，很奇怪
-		'nth-child\\\((\\\w+)\\\)':function(domsLocated,execAry){
+		'^nth-child\\\((\\\w+)\\\)$':function(domsLocated,execAry){
 											
 												var childSet = [],
 													childs,
