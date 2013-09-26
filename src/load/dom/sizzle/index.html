@@ -14,15 +14,15 @@
 	
 	<div id="oDiv">
 		
-		<div class="header1"><span class="list"></span><span class="list"><span></span></span> </div>
+		<div class="header1"><span class="list" ></span><span class="list"><span></span></span> </div>
 		<div class="header name"><span>innosnap</span></div>
 		<div class="header"><span class="list"><span class="list"> <span></span></span></span></div>
-		<p class="p1" name="asdpar"><span></span></p>
+		<p class="p1" name="wwasdpar"><span></span></p>
 		<div class="header111 name"><span></span></div>
 		<p class="p2" name="wwdpar">1</p>
 		<p class="p3">2</p>
 		<p class="p4">3</p>
-		<div class="header111"><span></span></div>
+		<div class="header111" ><span></span></div>
 		<p class="p5">2</p>
 		<p class="p6">3</p>
 		<input id="b1"  value="点击"/>
@@ -37,10 +37,25 @@
 		//alert(b2.getAttribute('type'))
 		//alert(b2.type)
 		require.openDebug();
-		require('./sizzle',function(sizzle){			
-			var headers = sizzle('#oDiv p[name^="a"]');
-			console.log(headers)
-			console.log(headers.length);
+		require('./sizzle',function(sizzle){
+			
+			//var headers = sizzle('#oDiv p[name^="a"]');
+			//console.log(headers)
+			
+			console.log(sizzle('#oDiv div+p'))
+			console.log(sizzle('#oDiv div~p'))
+			console.log(sizzle('#oDiv div:odd'))
+			console.log(sizzle('#oDiv div~p:first'))
+			console.log(sizzle('#oDiv div~p:last'))
+			console.log(sizzle('#oDiv div~p:eq(1)'))
+			console.log(sizzle('#oDiv div:first-child'))
+			console.log(sizzle('#oDiv div:last-child'))
+			console.log(sizzle('#oDiv div:nth-child(2)'))
+			
+			console.log(sizzle('#oDiv p[name^=ww]'));
+			console.log(sizzle('#oDiv p[name^=ww].p2'));
+			
+			console.log(sizzle('#oDiv div:nth-child(5n)'))
 			//console.log(headers[0].tagName);
 		})
 	</script>

@@ -324,7 +324,7 @@ define(['.../units/units'],function(units){
 					}
 					
 					_tempSelectorStr = selector.slice(preChar.index+1,subEnd);
-					console.log(_tempSelectorStr)
+					//console.log(_tempSelectorStr)
 					//console.log(domsLocated)
 					//console.log(preChar.charCode)
 					
@@ -441,6 +441,8 @@ define(['.../units/units'],function(units){
 			attrRealPattern,
 			testPattern;
 		
+		//console.log(selector)
+		
 		if(attrResult && attrResult.length>=4){
 			attrName = attrResult[1];
 			attrValue = attrResult[3];
@@ -545,7 +547,8 @@ define(['.../units/units'],function(units){
 					},
 
 
-		'\\beq\\\((\\\d+)\\\)\\b':function(domsLocated,execAry){
+		'eq\\\((\\\d+)\\\)':function(domsLocated,execAry){
+										//console.log(domsLocated+'eq')
 										var eqChild , index;
 										if(execAry.length>1){
 											index = execAry[1]*1;
@@ -553,7 +556,7 @@ define(['.../units/units'],function(units){
 										eqChild = slice.call(domsLocated , index , index+1);
 										return eqChild;
 									},		
-		'\\bgt\\\((\\\d+)\\\)\\b':function(domsLocated,execAry){
+		'gt\\\((\\\d+)\\\)':function(domsLocated,execAry){
 										var gtChild , index;
 										if(execAry.length>1){
 											index = execAry[1]*1;
@@ -561,7 +564,7 @@ define(['.../units/units'],function(units){
 										gtChild = slice.call(domsLocated , index , domsLocated.length-1);
 										return gtChild;
 									},
-		'\\blt\\\((\\\d+)\\\)\\b':function(domsLocated,execAry){
+		'lt\\\((\\\d+)\\\)':function(domsLocated,execAry){
 										var ltChild , index;
 										if(execAry.length>1){
 											index = execAry[1]*1;
@@ -611,7 +614,8 @@ define(['.../units/units'],function(units){
 								return childSet;
 							},
 					//匹配当前元素是其父元素的第几个标签，从下标1开始的，很奇怪
-		'\\bnth-child\\\((\\\w+)\\\)\\b':function(domsLocated,execAry){
+		'nth-child\\\((\\\w+)\\\)':function(domsLocated,execAry){
+											
 												var childSet = [],
 													childs,
 													location,
@@ -621,7 +625,7 @@ define(['.../units/units'],function(units){
 												location = execAry[1];
 												locationPatternExecResult = locationPattern.exec(location);	
 												
-												console.log(locationPatternExecResult)
+//												console.log(locationPatternExecResult)
 												units.each(domsLocated,function(domkey,domValue){
 													
 													childs = children(domValue.parentNode);
@@ -653,9 +657,13 @@ define(['.../units/units'],function(units){
 																					if(key == 3 && (index+1) == value){
 																						childSet.push(domValue);
 																					}
+																					//console.log(key)
 																					
-																					
+																					//console.log(index)
 																					if(key == 4 && (index+1)%value === 0){
+																						//console.log(value)
+																						//console.log(key)
+																						//console.log((index+1)%value)
 																						childSet.push(domValue);
 																					}
 																					
