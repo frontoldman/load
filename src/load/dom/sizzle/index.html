@@ -17,9 +17,9 @@
 		<div class="header1"><span class="list"></span><span class="list"><span></span></span> </div>
 		<div class="header name"><span>innosnap</span></div>
 		<div class="header"><span class="list"><span class="list"> <span></span></span></span></div>
-		<p class="p1" name="par"><span></span></p>
+		<p class="p1" name="asdpar"><span></span></p>
 		<div class="header111 name"><span></span></div>
-		<p class="p2">1</p>
+		<p class="p2" name="wwdpar">1</p>
 		<p class="p3">2</p>
 		<p class="p4">3</p>
 		<div class="header111"><span></span></div>
@@ -38,7 +38,7 @@
 		//alert(b2.type)
 		require.openDebug();
 		require('./sizzle',function(sizzle){			
-			var headers = sizzle('#oDiv p[name="par"].p1');
+			var headers = sizzle('#oDiv p[name^="a"]');
 			console.log(headers)
 			console.log(headers.length);
 			//console.log(headers[0].tagName);

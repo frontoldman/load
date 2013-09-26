@@ -291,14 +291,18 @@ define(['.../units/units'],function(units){
 					continue;
 				}
 				
+				//#######这地方比较乱
+				
 				//连接起来的.操作符比较特殊，需要分类操作
 				if(currentChar === '.'){
 					//只要.不在第一个或者.之前没有特殊字符选择器,就跳出当前循环
 					subStartChar = selector.charAt(i-1)
-					console.log(subStartChar)
-					if( i === 0 || subStartChar === ']' || !filterSymbolPattern.test(subStartChar)){
+					//console.log(subStartChar)
+					if(i === 0 || !filterSymbolPattern.test(subStartChar)){
+
 						subEndIndex = i-1;	
-						if(i == 0 || subStartChar === ']'){//解决以.开头没法分析错误的bug
+						
+						if(i == 0){//解决以.开头没法分析错误的bug
 							preChar = {
 								index:subEndIndex,
 								charCode:patternResult[0]
@@ -313,12 +317,12 @@ define(['.../units/units'],function(units){
 					
 					if(i == len-1 ){
 						subEnd = len;
-					}else if(subStartChar == ']'){
+					}else if(currentChar == ']'){
 						subEnd = i+1;
 					}else{
 						subEnd = i
 					}
-					//console.log(subStartChar)
+					
 					_tempSelectorStr = selector.slice(preChar.index+1,subEnd);
 					console.log(_tempSelectorStr)
 					//console.log(domsLocated)
@@ -426,17 +430,54 @@ define(['.../units/units'],function(units){
 		return temp;
 	}
 	
+	var attrPattern = /\[(\w+)([\^|\$\*]?)=(?:['|"]?)(\w+)(?:['|"]?)\]/;
 	//[]
 	function splitByBracket(selector,domsLocated){
-		console.log(selector)
-		return domsLocated
+		
+		var temp = [],
+			attrResult = attrPattern.exec(selector),
+			attrName,
+			attrValue,
+			attrRealPattern,
+			testPattern;
+		
+		if(attrResult && attrResult.length>=4){
+			attrName = attrResult[1];
+			attrValue = attrResult[3];
+			attrRealPattern = attrResult[2];
+			try{
+				switch(attrRealPattern){
+					case '^':testPattern = new RegExp('^'+attrValue);break;
+					case '$':testPattern = new RegExp(attrValue+'$');break;
+					case '*':testPattern = new RegExp(attrValue);break;
+					default:testPattern = new RegExp('\\b'+attrValue+'\\b');break;
+							break;
+				}
+			}catch(e){
+				throw 'selector error';
+			}
+			
+			temp = units.filter(domsLocated,function(key,value){
+				var domAttrName = value.getAttribute(attrName);
+				//取不到显示设置的属性，尝试一下默认属性
+				if(!domAttrName){
+					domAttrName = value[attrName]
+				}
+				if(testPattern.test(domAttrName)){
+					return true;
+				}
+				
+			})
+		}
+		
+		return temp
 		
 	}
 	
 	//：过滤选择器，有选择性的支持了常用的选择器，一些可能永远不会被用到的选择器就不要也罢
 	function splitByColon(selector,domsLocated){
 
-		console.log(selector)
+		//console.log(selector)
 		
 		var i , j ,
 			currentColonFilters ,
