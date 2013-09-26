@@ -10,6 +10,7 @@
 <p>
   这是基于load模块加载器的一个模块<br/>
 用法如下：<br/>
+require('./sizzle',function(sizzle){<br/>
 	console.log('#oDiv div+p',sizzle('#oDiv div+p'))<br/>
 	console.log('#oDiv div~p',sizzle('#oDiv div~p'))<br/>
 	console.log('#oDiv div:odd',sizzle('#oDiv div:odd'))<br/>
@@ -24,4 +25,5 @@
 	console.log('#oDiv p[name^=ww].p2',sizzle('#oDiv p[name^=ww].p2'));<br/>
 
 	console.log('#oDiv div:nth-child(5n)',sizzle('#oDiv div:nth-child(5n)'))<br/>
+})<br/>
 </p>

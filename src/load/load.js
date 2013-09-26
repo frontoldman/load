@@ -248,7 +248,7 @@
 		var i = 0,len ,currentLoad,module;
 		//通过一个异步让模块先解析完成并获得url
 		setTimeout(function(){
-			
+			//console.log(__tempFactory.url)
 			relay = formatURL(relay,__tempFactory.url);
 			for (len = relay.length; i < len; i++) {               
 				deep[relay[i]] = i;          //顺序传递参数
@@ -322,8 +322,8 @@
     function formatURL(relay,originUrl){
 		var currentUrl,
 			//根据originUrl判断是从html页面引入的模块还是从define里面引入的模块
-			_prefixUrl = originUrl?dirname(originUrl):prefixUrl;
-			//console.log(originUrl)
+			_prefixUrl = originUrl?dirname(originUrl):prefixUrl,currentPre = _prefixUrl;
+		//	console.log(_prefixUrl + ":" +originUrl)
         relay = __type(relay) === "[object String]" ? [relay] : relay;
          if (relay && __type(relay) === "[object Array]") {
             for(var i = 0 ,len = relay.length; i<len;i++){
@@ -343,20 +343,27 @@
 				}else if(/^\.\./.test(currentUrl)){//....../开头
 					var directoryDeep = /(\.+)\.\//.exec(currentUrl)[1].length,//目录深度					
 						newPrefixUrlPattern = new RegExp('(\\\w+\/){'+ directoryDeep +'}$','ig'),
-						theDirectoryNeedToBeReplaced = newPrefixUrlPattern.exec(_prefixUrl)[0];						
-					_prefixUrl = _prefixUrl.replace(theDirectoryNeedToBeReplaced,'');
+						theDirectoryNeedToBeReplaced = newPrefixUrlPattern.exec(_prefixUrl)[0];	
+                  //  console.log(directoryDeep)	
+                  //  console.log(newPrefixUrlPattern)
+                   // console.log(_prefixUrl)
+                  //  console.log(theDirectoryNeedToBeReplaced)  				
+					currentPre = _prefixUrl.replace(theDirectoryNeedToBeReplaced,'');
 					currentUrl = /\.+\/(.*)$/.exec(currentUrl)[1];
+                 //   console.log(_prefixUrl);
+                  //  console.log(currentUrl);
 				}else{
-					_prefixUrl = '';
+					currentPre = '';
 				}			
-			
-				currentUrl = _prefixUrl + currentUrl;
+			     
+				currentUrl = currentPre + currentUrl;
 				
-				
+				//console.log(currentUrl)
 				//TODO url格式化还要在整理整理，其他的格式比如a?x=1,a#11
                 relay[i] = /\.\w+\s*$/.test(currentUrl) ? currentUrl : currentUrl + '.js'; 
             }
          }
+         //console.log(relay)
          return relay;
     }
     /**
