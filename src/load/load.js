@@ -87,25 +87,56 @@
         url = formatURL(url);//格式化url参数
         var modulesLists = {length:0};
         var lock = false;
+		
+		var module,currentLoad;
+		
         if( url && url.length ){
             for(var i = 0 ,len = url.length;i<len;i++){ //只有modulesList的长度==url这个数组的长度才执行回调                                       
                 
 				modulesLists[url[i]] = i;                //通过define完成递归
-                if(__loaderContainer[url[i]]){
-                    modulesLists[i] = __loaderContainer[url[i]]; 
+				module = __loaderContainer[url[i]];
+				currentLoad = __loaderContainer.__TemporaryLoadList[url[i]]
+				
+				console.log(i,url[i]);
+				console.log(module && module.__$delay$);
+				console.log(currentLoad);
+                if(module && !module.__$delay$){
+                    modulesLists[i] = module; 
                     modulesLists.length ++;
-                    callback(i);
+                    callback();
+				}else if(currentLoad){
+						//console.log(module + ':loading');
+						//判断这个脚本是不是正在加载，却还没有加载成功，并没有成功解析
+						(function(list_n){
+							var list_n_interval = setInterval(function(){
+													var exports = __loaderContainer[list_n];
+													//console.log(__loaderContainer)
+													if(exports){
+														//页面中的require不会出现循环依赖，so这里是不必要的
+														if(exports.__$delay$){//循环依赖会出现有exports,并且__$delay$ = true
+															//clearInterval(list_n_interval);//暴力破坏循环依赖
+															//console.log('循环依赖？？？？')
+															//return false;
+														}else{
+															
+															modulesLists.length ++;
+															clearInterval(list_n_interval);
+															callback()
+														}													
+													}
+												},1)						
+						})(url[i])	
                 }else{     
                     __loadScript(url[i],function(exports,url){
                         modulesLists[modulesLists[url]]= exports;
                         modulesLists.length ++;
-                        callback(i);
+                        callback();
                     });
                 }
             }
         }
 
-        function callback(x){               
+        function callback(){               
             if(modulesLists.length >= len){      //require的回调执行时机
                 // console.log(modulesList);
                 if(__type(args[1]) === '[object Function]'){
@@ -268,9 +299,12 @@
 						var list_n_interval = setInterval(function(){
 												var exports = __loaderContainer[list_n];
 												if(exports){
+													//console.log(exports)
+													//循环依赖这里判断不准确
 													if(exports.__$delay$){//循环依赖会出现有exports,并且__$delay$ = true
-														clearInterval(list_n_interval);//暴力破坏循环依赖
-														return false;
+														//clearInterval(list_n_interval);//暴力破坏循环依赖
+														console.log('循环依赖？？？？')
+														//return false;
 													}else{
 														clearInterval(list_n_interval);
 														defineCallback(exports,list_n)
