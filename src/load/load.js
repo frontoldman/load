@@ -22,7 +22,10 @@
 		
 		//这是一个正在加载的模块的列表存储器，用来解决加载相同模块的在很短时间内会出现同时加载的情况
 		__loaderContainer.__TemporaryLoadList = {};
-		
+		//这是一个依赖列表，其作用是处理循环依赖
+    __loaderContainer.relayList = {};
+
+
 		//重置console,解决ie6报错
         if(!global.console){
              global.console = {
@@ -97,9 +100,9 @@
 				module = __loaderContainer[url[i]];
 				currentLoad = __loaderContainer.__TemporaryLoadList[url[i]]
 				
-				console.log(i,url[i]);
-				console.log(module && module.__$delay$);
-				console.log(currentLoad);
+				//console.log(i,url[i]);
+				//console.log(module && module.__$delay$);
+				//console.log(currentLoad);
                 if(module && !module.__$delay$){
                     modulesLists[i] = module; 
                     modulesLists.length ++;
@@ -271,28 +274,51 @@
        //}
        //__tempFactory是个临时模块，通过这个理临时模块占位，然后通过这个临时模块带回来url和回调函数，一层一层的
        //递归下去，(其实不是递归，只不过把当前回调传入到下一层去了)
-       var deep = { length:0 },__tempFactory = {__$delay$:true};//这是一个神奇的对象
-	
-		
+       var deep = { length:0 },
+          __tempFactory = {__$delay$:true},//这是一个神奇的对象
+	        i = 0 ,
+          len,
+          currentLoad,
+          currentRelay,
+          module,
+          currentRelayList = {};
+		    
        __analyticDefine(__tempFactory,id);            //第一个脚本已经load,需要解析,有依赖，传入一个对象延迟执行
 		
-		var i = 0,len ,currentLoad,module;
+
 		//通过一个异步让模块先解析完成并获得url
 		setTimeout(function(){
 			//console.log(__tempFactory.url)
+      
+     // var 
+
+
 			relay = formatURL(relay,__tempFactory.url);
-			for (len = relay.length; i < len; i++) {               
-				deep[relay[i]] = i;          //顺序传递参数
-				currentLoad = __loaderContainer.__TemporaryLoadList[relay[i]];
-				module = __loaderContainer[relay[i]];
+			for (len = relay.length; i < len; i++) {    
+          
+        
+
+        currentRelay = relay[i];
+				deep[currentRelay] = i;          //顺序传递参数
+				currentLoad = __loaderContainer.__TemporaryLoadList[currentRelay];
+				module = __loaderContainer[currentRelay];
 				//console.log(__loaderContainer[relay[i]])
 				//console.log(relay[i])
 				//console.log(__loaderContainer[relay[i]])
+
+        if(checkRelay(__tempFactory.url,currentRelay)){
+          //循环依赖暴力破解
+          console.log('你为何放弃治疗？')
+          return;
+        };
+
+				currentRelayList[currentRelay] = true;
 				
-				
-			   if(module && !module.__$delay$){	//循环依赖的时候 	module：true 	  module.__$delay$:true 
-					defineCallback(module,relay[i]);
-			   }else if(currentLoad){
+			   if(module && !module.__$delay$){	
+					
+          defineCallback(module,currentRelay);
+			   
+         }else if(currentLoad){
 					//console.log(module + ':loading');
 					//判断这个脚本是不是正在加载，却还没有加载成功，并没有成功解析
 					(function(list_n){
@@ -301,24 +327,27 @@
 												if(exports){
 													//console.log(exports)
 													//循环依赖这里判断不准确
-													if(exports.__$delay$){//循环依赖会出现有exports,并且__$delay$ = true
-														//clearInterval(list_n_interval);//暴力破坏循环依赖
-														console.log('循环依赖？？？？')
-														//return false;
-													}else{
+													if(!exports.__$delay$){														
 														clearInterval(list_n_interval);
 														defineCallback(exports,list_n)
 													}													
 												}
 											},1)						
-					})(relay[i])					
+					})(currentRelay)					
 			   }else{
 					//console.log(module + ':toLoad')
-					__loadScript(relay[i],function(exports,url){  //需要把所有的exports传入到a的回调中去
+					__loadScript(currentRelay,function(exports,url){  //需要把所有的exports传入到a的回调中去
 						defineCallback(exports,url);
 					})
 			   }
 			}
+
+
+      
+
+      __loaderContainer.relayList[__tempFactory.url] = currentRelayList;//依赖列表赋值
+     // console.log(__loaderContainer.relayList);
+      //console.log()
 			//TODO:修复ie延时问题
 			//此处为ie加个延迟,ie不能正确解析模块与对应url之间的关系，导致地址判断异常，在模块较多的时候延时会比较严重
 		},__isIE?11:0)
@@ -342,6 +371,31 @@
                 }
         }
     };
+
+    //处理模块之间互相依赖的函数
+    function checkRelay(currentModule,relayModule){
+      var isCircularDependencies,
+          beforeRelay = __loaderContainer.relayList[relayModule];
+          //console.log(currentModule,relayModule)
+         // console.log(beforeRelay)
+
+        if(beforeRelay){
+          for(var j in beforeRelay){
+            if(j == currentModule){
+              isCircularDependencies = true;
+              break;
+            }else if(__loaderContainer.relayList[j]){
+              if(checkRelay(currentModule,j)){
+                isCircularDependencies = true;
+                break;
+              }
+            }
+          }
+        }
+
+        
+        return isCircularDependencies;
+    }
 
     //。。。。
     var argslength3 = function(){
