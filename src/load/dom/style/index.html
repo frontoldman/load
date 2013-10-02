@@ -4,7 +4,12 @@
 <meta charset="utf-8">
 <title>style-test</title>
 <style type="text/css">
-	.HEADER{color:red;}
+	#oDiv{
+		width:100px;
+		height:100px;
+		padding:100px;
+		background-color: #ff0000;
+	}
 
 </style>
 <script type="text/javascript" src="../../load.js"></script>
@@ -16,20 +21,18 @@
 		sc
 	</div>
 	
-	<script>
-		
-		
-		
-		
+	<script>		
 	
 		require.openDebug();
 		require(['./style','../sizzle/sizzle'],function(style,sizzle){
-			alert(11)
-			var oDiv = sizzle('#oDiv');
-			//console.log(oDiv)
-			//var style = style.get(oDiv,'background');
+			var oDiv = sizzle('#oDiv')[0];
 			
-			//console.log(style);
+			var width = style.get(oDiv,'width');
+			console.log(width)
+			var backgroundColor = style.get(oDiv,'backgroundColor');
+			console.log(backgroundColor)
+			var float = style.get(oDiv,'float');
+			console.log(float)
 		})
 	</script>
 </body>

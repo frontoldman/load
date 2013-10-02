@@ -1,22 +1,37 @@
 define(['.../units/units','../sizzle/sizzle'],function(units,sizzle){
 	
+
+	//兼容性的样式映射表
+	//0 是标准浏览器
+	//1 是ie
+	var propMapping = {
+		'float':'cssFloat'
+	}
+
+	//格式化差异化的css属性值
+	var formatProp = function(prop,index){
+		if(propMapping[prop]){
+			return propMapping[prop]
+		}
+
+		return prop;
+	}
+
 	/**
 		为了方便，所有的domObj，均为原生dom元素
 	**/
 	
-	var getStyleFn = (function(){
-						var getStyle = document.defaultView && document.defaultView.getComputedStyle
+	var getStyleFn = function(elem,prop){
+						return elem.currentStyle[prop]; 
+						var getStyle = window.getComputedStyle,index ;
 						if(getStyle){
-							return function(obj,prop){
-								document.defaultView.getComputedStyle(obj,null)[prop];
-							}
+							return window.getComputedStyle( elem, null )[prop];
 						}else{
-							return function(obj,prop){
-								obj.currentStyle[prop];  
-							}
+							return elem.currentStyle[prop]; 
 						}
+							
 						//alert(document.defaultView.getComputedStyle);
-					})()
+					}
 
 	//alert(getStyleFn)
 	
