@@ -30,8 +30,8 @@
         if(!global.console){
              global.console = {
                 log:function(msg){
-					alert(msg)
-				}
+        					alert(msg);
+        				}
              }
         }
 	

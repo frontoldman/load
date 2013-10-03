@@ -4,22 +4,38 @@
 <meta charset="utf-8">
 <title>style-test</title>
 <style type="text/css">
+	body{
+		line-height:100px;
+	}
+	
 	#oDiv{
+		
 		width:100px;
 		height:100px;
 		padding:100px;
 		background-color: #ff0000;
+		zoom:1;
+		filter:alpha(opacity=50);
+		opacity:0.5;
+		float: left;
+		margin: 10px;
+		border:5px solid #d2d2d2;
+		
+		
+		
 	}
 
 </style>
 <script type="text/javascript" src="../../load.js"></script>
+<script type="text/javascript" src="http://code.jquery.com/jquery-1.9.1.js"></script>
 </head>
 
 <body>
 	
-	<div id="oDiv">
-		sc
-	</div>
+	
+		<div id="oDiv">
+			sc
+		</div>
 	
 	<script>		
 	
@@ -28,11 +44,60 @@
 			var oDiv = sizzle('#oDiv')[0];
 			
 			var width = style.get(oDiv,'width');
-			console.log(width)
+			//console.log(width)
 			var backgroundColor = style.get(oDiv,'backgroundColor');
-			console.log(backgroundColor)
+			//console.log(backgroundColor)
 			var float = style.get(oDiv,'float');
-			console.log(float)
+			//console.log(float)
+			var position = style.get(oDiv,'position');
+			//console.log(position)
+			var zIndex = style.get(oDiv,'z-index');
+			//console.log(zIndex) //auto
+			var top = style.get(oDiv,'top');
+			//console.log(top)
+			var display = style.get(oDiv,'display');
+			//console.log(display)
+			var float = style.get(oDiv,'float');
+			//console.log(float)
+			var visibility = style.get(oDiv,'visibility');
+			//console.log(visibility)
+			var overflow = style.get(oDiv,'overflow');
+			//console.log(overflow)
+			var margin = style.get(oDiv,'margin-left');
+			//console.log(margin)
+			var padding = style.get(oDiv,'padding');
+			//console.log(padding)
+			var border = style.get(oDiv,'border-left-color');
+			//console.log(border)
+			var color = style.get(oDiv,'color');
+			//console.log(color)
+			var font = style.get(oDiv,'font-family');
+			//console.log(font)
+			var lineHeight = style.get(oDiv,'lineHeight');
+			//console.log(lineHeight);
+			var opacity = style.get(oDiv,'opacity');
+			//console.log(opacity);
+			//var filter = style.get(oDiv,'filter');
+			//console.log(filter);
+
+			/**
+			style.set(oDiv,'width','500px')
+			style.set(oDiv,'font-size','500px')
+			style.set(oDiv,{
+				'background':'blue',
+				'border-width':'10px',
+				'opacity':'0.1'
+			})
+			**/
+			//oDiv.style.filter = 'alpha(opacity=10);'
+
+			var offset = style.getOffset(oDiv);
+			//console.log(offset.left);
+			//var clientRect = oDiv.getBoundingClientRect();
+			//console.log(clientRect.top)
+
+			var width = $('#oDiv').width();
+			console.log(width);
 		})
 	</script>
 </body>
