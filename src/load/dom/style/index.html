@@ -10,7 +10,7 @@
 	
 	#oDiv{
 		
-		width:100px;
+	
 		height:100px;
 		padding:100px;
 		background-color: #ff0000;
@@ -96,8 +96,11 @@
 			//var clientRect = oDiv.getBoundingClientRect();
 			//console.log(clientRect.top)
 
-			var width = $('#oDiv').width();
-			console.log(width);
+			//var width = $('#oDiv').width();
+			//console.log(width);
+
+			var size = style.getSize(oDiv);
+			console.log(size)
 		})
 	</script>
 </body>

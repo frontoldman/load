@@ -116,7 +116,12 @@ define(['.../units/units'],function(units){
 
 
 
-	
+	var getSize = function(elem){
+		return {
+			width:elem.clientWidth,
+			height:elem.clientHeight
+		}
+	}
 	
 	var style = function(elem){
 		
@@ -124,6 +129,8 @@ define(['.../units/units'],function(units){
 	
 	style.get = getStyleFn;
 	style.set = setStyleFn;
-	style.getOffset = getOffset
+	style.getOffset = getOffset;
+	style.getSize = getSize;
+
 	return  style;
 })
