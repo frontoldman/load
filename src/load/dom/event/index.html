@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>event-test</title>
+<style type="text/css">
+	.HEADER{color:red;}
+
+</style>
+<script type="text/javascript" src="../../load.js"></script>
+</head>
+
+<body>
+	
+	<div id="oDiv">
+		<p></p>
+		<div class="header1"><span class="list" ></span><span class="list"><span></span></span> </div>
+		<div class="header name"><span>innosnap</span></div>
+		<div class="header"><span class="list"><span class="list"> <span></span></span></span></div>
+		<p class="p1" name="wwasdpar"><span></span></p>
+		<div class="header111 name"><span></span></div>
+		<p class="p2" name="wwdpar">1</p>
+		<p class="p3">2</p>
+		<p class="p4">3</p>
+		<div class="header111" ><span></span></div>
+		<p class="p5">2</p>
+		<p class="p6">3</p>
+		<input id="b1" type="button" value="点击"/>
+		<button id="b2" >点击</button>
+	</div>
+	
+	<script>
+		
+		
+		require.openDebug();
+		require('./events',function(events){
+			var b2 = document.getElementById('b2');
+
+			var fn = function(){
+				console.log('b2-3')
+			}
+
+			events.on(b2,'click',function(){
+				console.log('b2-1')
+			});
+			//events.on(b2);
+			//events.on(document,'click','document');
+
+			events.on(b2,'click',function(){
+				console.log('b2-2')
+			});
+			//events.un(b2,'click','b2-2');
+
+			events.on(b2,'click',fn)
+
+			events.on(document.getElementById('b1'),'click',function(){
+				events.un(b2,'click')
+			});
+
+		})
+	</script>
+</body>
+</html>
