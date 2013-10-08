@@ -1,4 +1,4 @@
-				clearInterval(inter);
+				
                 var self = $(this),
                     distId = self.attr('dist'),
                     doc = $(document),

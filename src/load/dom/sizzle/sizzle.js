@@ -866,6 +866,6 @@ define(['.../units/units'],function(units){
 		return dom.getAttribute(attrStr)
 	}
 	
-	sizzle.units = units;
+	//sizzle.units = units;
 	return  sizzle;
 })

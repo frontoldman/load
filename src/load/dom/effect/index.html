@@ -2,9 +2,9 @@
 <html>
 <head>
 <meta charset="utf-8">
-<title>event-test</title>
+<title>effect-test</title>
 <style type="text/css">
-
+	.HEADER{color:red;}
 
 </style>
 <script type="text/javascript" src="../../load.js"></script>
@@ -33,18 +33,9 @@
 		
 		
 		require.openDebug();
-		require('./domReady',function(domReady){
+		require('./effect',function(animate){
 			
-			
-			domReady(function () {
-				console.log(1)
-			});
-			
-			
-			domReady(function () {
-				console.log(2)
-			});
-			
+
 		})
 	</script>
 </body>

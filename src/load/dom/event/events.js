@@ -1,5 +1,7 @@
 define(['.../units/units'],function(units){
 
+	"use strict";
+
 	var cacheData = {},
 		uuid = 1,
 		expando = 'cache' + ( +new Date() + "" ).slice( -8 );  // 生成随机数
@@ -75,9 +77,9 @@ define(['.../units/units'],function(units){
 		},
 		delEvent : function(elem,type,handler){
 			if(elem.removeEventListener){
-				elem.removeEventListener( type, handler, false );
+				elem.removeEventListener( type, handler);
 			}else{
-				elem.detachEvent( 'on' + type, handler );
+				elem.detachEvent( 'on' + type, handler);
 			}
 		}
 	}
@@ -96,7 +98,7 @@ define(['.../units/units'],function(units){
 			fn:回调
 		**/
 		on:function(elem,eventType,handler){
-			var dataVal = eventType+'Event',
+			var dataVal = eventType+'Events',
 				dataData;
 				
 			dataData = action.data(elem,dataVal,handler);
@@ -106,7 +108,7 @@ define(['.../units/units'],function(units){
 				var eventHandler = function(e){
 					
 					dataData = action.data(elem,dataVal);
-					console.log(111)
+					//console.log(111)
 					if(!dataData){
 						return;
 					}
@@ -118,15 +120,16 @@ define(['.../units/units'],function(units){
 				}
 
 				action.addEvent(elem,eventType,eventHandler);
+				//action.delEvent(elem,eventType,eventHandler);
 				action.data(elem,eventType,eventHandler);
 			}
 
 		},
 		un:function(elem,eventType,handler){
-			action.delData(elem,eventType+'Event',handler);
+			action.delData(elem,eventType+'Events',handler);
 			if(!handler){
 				var evnetHandler = action.data(elem,eventType);
-				console.log(evnetHandler);
+				//console.log(evnetHandler);
 				action.delEvent(elem,eventType,evnetHandler);
 			}
 			
