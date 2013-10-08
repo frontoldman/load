@@ -1,0 +1,24 @@
+				clearInterval(inter);
+                var self = $(this),
+                    distId = self.attr('dist'),
+                    doc = $(document),
+                    distLocation = $('#'+distId).offset().top,
+                    startTop = doc.scrollTop();
+
+                var fn = jQuery.easing['linear'];
+                var distance = distLocation - startTop;
+                var time = 13;
+                var startTime = (new Date()).getTime();
+
+                inter = setInterval(function(){
+                    var remaining = duration + startTime - (new Date()).getTime();
+                    if(remaining <= 0){ //jQuery动画停止的标志是时间，真正的时间
+                        clearInterval(inter)
+                        doc.scrollTop(distLocation);
+                        return;
+                    }
+                    var temp = remaining / duration || 0;
+                    var percent = 1 - temp;
+                    var pos = fn( percent ,duration * percent,0, 1, duration);
+                    doc.scrollTop(pos*distance+startTop)
+                },time)
