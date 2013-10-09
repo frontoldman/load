@@ -10,7 +10,7 @@ define(['.../units/units'],function(units){
 	}
 
 	var camelPattern = /\-(\w{1})/ig;
-	var rNumnopx = /^\s*(-?\d+)((?:pt)|(?:em))\s*$/i;
+	var rNumnopx = /(em|pt|mm|cm|pc|in|ex|rem|vw|vh|vm|ch|gr)$/i;
 	//格式化差异化的css属性值
 	var formatProp = function(prop){
 		
@@ -37,6 +37,9 @@ define(['.../units/units'],function(units){
 
 							styleResult = window.getComputedStyle( elem, null )[prop];
 							
+							//auto全部置为0
+							styleResult = /auto/i.test(styleResult) ? 0 : styleResult;
+
 						}else{
 							
 							prop = propMapping[prop] ? propMapping[prop] : prop;							
@@ -46,11 +49,35 @@ define(['.../units/units'],function(units){
 								styleResult = IEStyleGet[prop](styleResult,elem);
 							}
 
+							//console.log(prop,styleResult)
+							//From http://erik.eae.net/archives/2007/07/27/18.54.15/#comment-102291
+			                if (rNumnopx.test(styleResult)){
+
+			                	var style = elem.style.left;  
+
+				                var runtimeStyle = elem.runtimeStyle.left; 
+
+				                elem.runtimeStyle.left = elem.currentStyle.left;
+
+				                elem.style.left = styleResult || 0; 
+
+				                styleResult = elem.style.pixelLeft + 'px';  
+
+				                elem.style.left = style;  
+
+				                elem.runtimeStyle.left = runtimeStyle;  
+
+			                };  
+				                
+				            
+
+							/**
 							//pt em 转换成 px
 							var unitCheck = rNumnopx.exec(styleResult);
 
 							styleResult = unitCheck ? getPxNum[unitCheck[2].toLowerCase()](unitCheck) : 
-														styleResult;													
+														styleResult;
+							**/													
 						}
 						
 						return 	styleResult;						
@@ -88,6 +115,12 @@ define(['.../units/units'],function(units){
 		'height':function(styleResult,elem){
 
 			return getWidthOrHeight('height',styleResult,elem);
+		},
+		'left':function(styleResult,elem){
+			return getLeftOrTop('left',styleResult,elem);
+		},
+		'top':function(styleResult,elem){
+			return getLeftOrTop('top',styleResult,elem);
 		}
 	}
 	
@@ -104,11 +137,35 @@ define(['.../units/units'],function(units){
 
 			ret = parseFloat(elem[ formatProp('client-' + name) ] , 10)  	
 				- parseFloat(getStyleFn( elem , 'padding-' + paddingRet[0])) 
-				- parseFloat(getStyleFn( elem , 'padding-' + paddingRet[1]))
+				- parseFloat(getStyleFn( elem , 'padding-' + paddingRet[1]));
+
+			ret = ret + 'px';
 
 		}
 
 		return ret;
+	}
+
+	//IE 下面取得top和left值
+	var getLeftOrTop = function(name,styleResult,elem){
+
+		var ret = styleResult;
+
+		if(!/\d+(px)$/.test( styleResult )){
+
+			var position = getStyleFn(elem,'position');
+
+			if(/(absolute|relative|fixed)/.test(position)){
+				var margin = getStyleFn(elem , 'margin-' + name);
+				margin = /auto/i.test(margin) ? 0 : margin ;
+				ret = parseFloat(elem[ formatProp('offset-' + name) ],10) 
+					- parseFloat( margin,10);
+			}
+
+		}
+
+		return ret;
+
 	}
 	
 	var setStyleFn = function(elem,prop,value){
