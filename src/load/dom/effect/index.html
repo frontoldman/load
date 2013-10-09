@@ -35,6 +35,17 @@
 		require.openDebug();
 		require('./effect',function(animate){
 			
+			var oDiv = document.getElementById('oDiv');
+			
+			animate(oDiv,{
+				'width':'1000px',
+				'height':'1000px',
+				'padding-left':'1000px',
+				'font-size':'14px',
+				'fontSize':'			   15px',
+				'left':'   -500px',
+				'overflow':'hidden'
+			},1000,'linear',function(){})
 
 		})
 	</script>

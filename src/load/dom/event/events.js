@@ -114,7 +114,7 @@ define(['.../units/units'],function(units){
 					}
 					for(var i=0;i<dataData.length;i++){
 						if(units.getType(dataData[i]) === 'Function'){
-							dataData[i]();
+							dataData[i](e);
 						}
 					}
 				}
