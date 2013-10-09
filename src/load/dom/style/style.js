@@ -10,6 +10,7 @@ define(['.../units/units'],function(units){
 	}
 
 	var camelPattern = /\-(\w{1})/ig;
+	var rNumnopx = /^\s*(-?\d+)((?:pt)|(?:em))\s*$/i;
 	//格式化差异化的css属性值
 	var formatProp = function(prop){
 		
@@ -32,29 +33,83 @@ define(['.../units/units'],function(units){
 
 						prop = formatProp(prop);
 
-						if(de.currentStyle){
+						if(window.getComputedStyle){
+
+							styleResult = window.getComputedStyle( elem, null )[prop];
+							
+						}else{
 							
 							prop = propMapping[prop] ? propMapping[prop] : prop;							
 							styleResult = elem.currentStyle[prop];
 
-							if(prop === 'filter') {
-								var opacityAry = /alpha\(opacity\=(\d+)\)/.exec(styleResult);
-								if(opacityAry && opacityAry.length>=2){
-									styleResult = opacityAry[1];
-									styleResult = styleResult/100;
-								}else{
-									styleResult = window.getComputedStyle( elem, null )[prop];
-								}
+							if(IEStyleGet[prop]){
+								styleResult = IEStyleGet[prop](styleResult,elem);
 							}
-						}else{
-							styleResult = window.getComputedStyle( elem, null )[prop];
+
+							//pt em 转换成 px
+							var unitCheck = rNumnopx.exec(styleResult);
+
+							styleResult = unitCheck ? getPxNum[unitCheck[2].toLowerCase()](unitCheck) : 
+														styleResult;													
 						}
 						
 						return 	styleResult;						
 					}
 
-	//alert(getStyleFn)
+	var getPxNum = {
+		'pt':function(unitCheck){
+			return unitCheck[1]*4/3 + 'px';
+		},
+		'em':function(unitCheck){
+			return unitCheck[1]*16 + 'px';
+		}
+	}
 	
+	var IEStyleGet = {
+		//IE 7 8 透明度获取hack
+		'filter':function(styleResult){
+
+			if(!styleResult){
+				return 1;
+			}
+
+			var opacityAry = /alpha\(opacity\=(\d+)\)/.exec(styleResult);
+			if(opacityAry && opacityAry.length>=2){
+				styleResult = opacityAry[1];
+				styleResult = styleResult/100;
+			}
+
+			return styleResult;
+		},
+		'width':function(styleResult,elem){
+			 
+			 return getWidthOrHeight('width',styleResult,elem);
+		},
+		'height':function(styleResult,elem){
+
+			return getWidthOrHeight('height',styleResult,elem);
+		}
+	}
+	
+
+	//IE下面获取宽度和高度
+	var getWidthOrHeight = function(name,styleResult,elem){
+
+		var ret = styleResult;
+
+		if(!/\d+(px)$/.test( styleResult )){
+
+			var paddingRet = name === 'width' ? ['left','right'] 
+										:['top','bottom'];
+
+			ret = parseFloat(elem[ formatProp('client-' + name) ] , 10)  	
+				- parseFloat(getStyleFn( elem , 'padding-' + paddingRet[0])) 
+				- parseFloat(getStyleFn( elem , 'padding-' + paddingRet[1]))
+
+		}
+
+		return ret;
+	}
 	
 	var setStyleFn = function(elem,prop,value){
 
