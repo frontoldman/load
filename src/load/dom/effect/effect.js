@@ -75,7 +75,7 @@ define(['.../units/units','../style/style','../sizzle/sizzle'],function(units,st
 					value = value[1]*1;
 					var currentStyle = style.get(elem,key)
 					console.log(currentStyle)
-					distance[key] = value - currentStyle;
+					distance[key] = value - parseFloat(currentStyle,10);
 				}
 			}
 		})
