@@ -5,14 +5,25 @@
 <title>effect-test</title>
 <style type="text/css">
 	
-
+	*{
+		margin:0;
+		padding:0;
+	}
+	#oDiv{
+		position:absolute;
+		left:0px;
+		top:0px;
+		zoom:1;
+		background:red;
+		border:1px solid #ddd;
+	}
 </style>
 <script type="text/javascript" src="../../load.js"></script>
 </head>
 
 <body>
 	
-	<div id="oDiv" style="position:absolute;left:0px;zoom:1;background:red;padding:100px;border:100px solid #ddd;">
+	<div id="oDiv" style="">
 		<p></p>
 		<div class="header1"><span class="list" ></span><span class="list"><span></span></span> </div>
 		<div class="header name"><span>innosnap</span></div>
@@ -38,16 +49,16 @@
 			var oDiv = document.getElementById('oDiv');
 			
 			animate(oDiv,{
-				'width':'1000px',
-				'height':'1000px',
-				'padding-left':'1000px',
-				'font-size':'14px',
-				'fontSize':'			   15px',
-				'left':'   -500px',
+				'width':'200px',
+				'height':'300px',
+				'padding-left':'100px',
+			//	'font-size':'50px',
+			//	'fontSize':'			   15px',
+				'left':'   100px',
 				'top':'100px',
 				'margin-left':'100px',
 				'overflow':'hidden',
-				'zoom':'5',
+				'zoom':'1',	//chrome认识这个属性，额 写样式的时候加*
 				'opacity':'0.5'
 			},1000,'linear',function(){})
 

@@ -2,7 +2,7 @@ define(['.../units/units','../style/style','../sizzle/sizzle'],function(units,st
 
 	"use strict";
 	
-	var easing = {
+	var jQueryEasing = {
 		linear: function( p ) {
 			return p;
 		},
@@ -34,6 +34,8 @@ define(['.../units/units','../style/style','../sizzle/sizzle'],function(units,st
 		var time = 13,		//定时器间隔时间
             startTime = (new Date()).getTime(),	//开始时间
 			distance = {},	//产生变化的距离的大小
+			origin = {},	//原始值
+			runtimeVal = {},	//运行时的值
 			animateInterval,
 			type ;
 		
@@ -70,40 +72,57 @@ define(['.../units/units','../style/style','../sizzle/sizzle'],function(units,st
 		//初始化可以动画的样式distance
 		units.each(props,function(key,value){
 			if(styleMeasureByNumericPattern.test(key)){
-				value = /^\s*(\-?\d+)/.exec(value);
+			
+				value = /^\s*(\-?(?:0+\.)?\d+)/.exec(value);
+
 				if(value && value.length >= 2){
 					value = value[1]*1;
 					var currentStyle = style.get(elem,key)
-					console.log(currentStyle)
-					distance[key] = value - parseFloat(currentStyle,10);
+
+					origin[key] = parseFloat(currentStyle,10)
+					distance[key] = value - origin[key];
 				}
 			}
 		})
 		
-		console.log(distance);
+
 		
-		return ;
+		//return ;
 		
 		animateInterval = setInterval(function(){
 				
 			var remaining = duration + startTime - (new Date()).getTime();
-			
+
 			if(remaining <= 0){ //jQuery动画停止的标志是时间，真正的时间
-				clearInterval(inter)
+
+				clearInterval(animateInterval)
 				//修正位置
-				
+				style.set(elem,props);
 				//执行回调
-				
+				complete && complete.call(elem);
 				return;
 			}
-
+			
 			var temp = remaining / duration || 0;
 			var percent = 1 - temp;
-			var pos = fn( percent ,duration * percent,0, 1, duration);
-			
+			var pos = jQueryEasing[easing]( percent ,duration * percent,0, 1, duration);
+
 			//根据偏移百分比计算偏移量，需要知道什么样的样式是以数值做单位的
 			//width,height,left,top,opacity,font-size,margin,padding,border
+			units.each(distance,function(key,value){
+				var originVal = origin[key];
+				
+				originVal = originVal + value*pos;
+
+				if(!/opacity/i.test(key)){
+					originVal += 'px';
+				}
+
+				runtimeVal[key] = originVal;
+			})
 			
+			
+			style.set(elem,runtimeVal);
 			
 				
 		},time)
