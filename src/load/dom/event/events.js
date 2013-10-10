@@ -52,8 +52,7 @@ define(['.../units/units'],function(units){
 				myCacheVal = myCache[val];
 				if(myCacheVal){
 					if(!data){
-
-						delete myCache[val];
+						myCache[val] = null;
 						return myCacheVal;
 					}
 					for(len = myCacheVal.length ; i<len ; i++){
@@ -81,6 +80,28 @@ define(['.../units/units'],function(units){
 			}else{
 				elem.detachEvent( 'on' + type, handler);
 			}
+		},
+		// 修复IE浏览器支持常见的标准事件的API
+		fixEvent : function( e ){
+			// 支持DOM 2级标准事件的浏览器无需做修复
+			if ( e.target ){
+				return e;
+			}
+			var event = {}, name;
+			event.target = e.srcElement || document;
+			event.preventDefault = function(){
+				e.returnValue = false;
+			};
+
+			event.stopPropagation = function(){
+				e.cancelBubble = true;
+			};
+			// IE6/7/8在原生的win.event中直接写入自定义属性
+			// 会导致内存泄漏，所以采用复制的方式
+			for( name in e ){
+				event[name] = e[name];
+			}
+			return event;
 		}
 	}
 
@@ -107,14 +128,17 @@ define(['.../units/units'],function(units){
 
 				var eventHandler = function(e){
 					
+					var event = action.fixEvent(e || window.event);
+					
 					dataData = action.data(elem,dataVal);
-					//console.log(111)
+
 					if(!dataData){
 						return;
 					}
+					
 					for(var i=0;i<dataData.length;i++){
 						if(units.getType(dataData[i]) === 'Function'){
-							dataData[i](e);
+							dataData[i](event);
 						}
 					}
 				}
@@ -125,7 +149,7 @@ define(['.../units/units'],function(units){
 			}
 
 		},
-		un:function(elem,eventType,handler){
+		off:function(elem,eventType,handler){
 			action.delData(elem,eventType+'Events',handler);
 			if(!handler){
 				var evnetHandler = action.data(elem,eventType);

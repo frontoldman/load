@@ -11,7 +11,7 @@ define(['.../units/units','../style/style','../sizzle/sizzle'],function(units,st
 		}
 	};
 	
-	var styleMeasureByNumericPattern = /(width)|(height)|(left)|(top)|(opacity)|(font\-*size)|(margin)|(padding)|(border)/i;
+	var styleMeasureByNumericPattern = /(width|height|left|top|opacity|font\-*size|margin|padding|border)/i;
 	
 	//默认参数
 	var defaultVal = {
