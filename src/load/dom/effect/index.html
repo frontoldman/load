@@ -44,9 +44,13 @@
 		
 		
 		require.openDebug();
-		require('./effect',function(animate){
+		require(['./effect','.../units/units','./jquery.easing.1.3.js'],function(animate,units,easing){
 			
 			var oDiv = document.getElementById('oDiv');
+			
+			units.extend(animate.jQueryEasing,easing);
+			
+			console.log(animate.jQueryEasing)
 			
 			animate(oDiv,{
 				'width':'200px',
@@ -60,7 +64,7 @@
 				'overflow':'hidden',
 				'zoom':'1',	//chrome认识这个属性，额 写样式的时候加*
 				'opacity':'0.5'
-			},1000,'linear',function(){})
+			},1000,'easeOutBounce',function(){})
 
 		})
 	</script>

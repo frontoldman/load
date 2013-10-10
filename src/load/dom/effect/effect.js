@@ -105,7 +105,7 @@ define(['.../units/units','../style/style','../sizzle/sizzle'],function(units,st
 			
 			var temp = remaining / duration || 0;
 			var percent = 1 - temp;
-			var pos = jQueryEasing[easing]( percent ,duration * percent,0, 1, duration);
+			var pos = animate.jQueryEasing[easing]( percent ,duration * percent,0, 1, duration);
 
 			//根据偏移百分比计算偏移量，需要知道什么样的样式是以数值做单位的
 			//width,height,left,top,opacity,font-size,margin,padding,border
@@ -128,6 +128,8 @@ define(['.../units/units','../style/style','../sizzle/sizzle'],function(units,st
 		},time)
 				
 	}
-
+	
+	animate.jQueryEasing = jQueryEasing;
+	
 	return animate;
 })

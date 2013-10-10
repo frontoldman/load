@@ -410,7 +410,8 @@
     function formatURL(relay,originUrl){
 		var currentUrl,
 			//根据originUrl判断是从html页面引入的模块还是从define里面引入的模块
-			_prefixUrl = originUrl?dirname(originUrl):prefixUrl,currentPre = _prefixUrl;
+			_prefixUrl = originUrl?dirname(originUrl):prefixUrl,
+			currentPre = _prefixUrl;
 		//	console.log(_prefixUrl + ":" +originUrl)
         relay = __type(relay) === "[object String]" ? [relay] : relay;
          if (relay && __type(relay) === "[object Array]") {
@@ -432,20 +433,18 @@
 					var directoryDeep = /(\.+)\.\//.exec(currentUrl)[1].length,//目录深度					
 						newPrefixUrlPattern = new RegExp('(\\\w+\/){'+ directoryDeep +'}$','ig'),
 						theDirectoryNeedToBeReplaced = newPrefixUrlPattern.exec(_prefixUrl)[0];	
-                  //  console.log(directoryDeep)	
-                  //  console.log(newPrefixUrlPattern)
-                   // console.log(_prefixUrl)
-                  //  console.log(theDirectoryNeedToBeReplaced)  				
+            				
 					currentPre = _prefixUrl.replace(theDirectoryNeedToBeReplaced,'');
 					currentUrl = /\.+\/(.*)$/.exec(currentUrl)[1];
-                 //   console.log(_prefixUrl);
-                  //  console.log(currentUrl);
+        
 				}else{
 					currentPre = '';
 				}			
 			     
+				//console.log(currentUrl,currentPre)
+				 
 				currentUrl = currentPre + currentUrl;
-				
+				currentPre = _prefixUrl;
 				//console.log(currentUrl)
 				//TODO url格式化还要在整理整理，其他的格式比如a?x=1,a#11
                 relay[i] = /\.\w+\s*$/.test(currentUrl) ? currentUrl : currentUrl + '.js'; 
