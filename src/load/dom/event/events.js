@@ -1,4 +1,4 @@
-define(['.../units/units'],function(units){
+define(['.../units/units','./data/data'],function(units,data){
 
 	"use strict";
 
