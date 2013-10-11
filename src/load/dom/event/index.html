@@ -33,18 +33,30 @@
 		
 		
 		require.openDebug();
-		require('./domReady',function(domReady){
+		require('./events',function(events){
 			
 			
-			domReady(function () {
+		//	domReady(function () {
+		//		console.log(1)
+		//	});
+			
+			
+		//	domReady(function () {
+		//		console.log(2)
+		//	});
+			
+			var b1 = document.getElementById('b1')
+			events.on(b1,'click',function(){
 				console.log(1)
-			});
+			})
 			
-			
-			domReady(function () {
+			events.on(b1,'click',function(){
 				console.log(2)
-			});
+			})
 			
+			events.on(b1,'click',function(){
+				console.log(3)
+			})
 		})
 	</script>
 </body>

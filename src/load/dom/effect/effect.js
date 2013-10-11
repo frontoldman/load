@@ -1,4 +1,4 @@
-define(['.../units/units','../style/style','../sizzle/sizzle'],function(units,style,sizzle){
+define(['.../units/units','../style/style','../data/data'],function(units,style,data){
 
 	"use strict";
 	
@@ -31,13 +31,7 @@ define(['.../units/units','../style/style','../sizzle/sizzle'],function(units,st
 			throw new error('the number of parameters is not enough！');
 		}
 		
-		var time = 13,		//定时器间隔时间
-            startTime = (new Date()).getTime(),	//开始时间
-			distance = {},	//产生变化的距离的大小
-			origin = {},	//原始值
-			runtimeVal = {},	//运行时的值
-			animateInterval,
-			type ;
+		var type;
 		
 		//初始化参数
 		if(duration){
@@ -65,10 +59,39 @@ define(['.../units/units','../style/style','../sizzle/sizzle'],function(units,st
 			easing = defaultVal.easing;
 		}
 		
+		var args = [elem,props,duration,easing,complete];
+		
+		var animateQueue =  data(elem,'animate');
+		
+		//队列中已有动画在执行，把当前动画存储起来，延迟执行
+		if(animateQueue){
+			animateQueue.push(args);
+			return;
+		}else{
+			animateQueue = [args];
+			data(elem,'animate',animateQueue);
+		}
+		
+		execAnimate.apply(window,args);
+	}
+	
+	
+	
+	
+	var execAnimate = function(elem,props,duration,easing,complete){
+	
+		
+		
+		var time = 13,		//定时器间隔时间
+            startTime = (new Date()).getTime(),	//开始时间
+			distance = {},	//产生变化的距离的大小
+			origin = {},	//原始值
+			runtimeVal = {},	//运行时的值
+			animateInterval,
+			animateQueue;	//动画队列
 		
 		//console.log(duration,easing,complete)
 		//return;
-		
 		//初始化可以动画的样式distance
 		units.each(props,function(key,value){
 			if(styleMeasureByNumericPattern.test(key)){
@@ -92,7 +115,6 @@ define(['.../units/units','../style/style','../sizzle/sizzle'],function(units,st
 		animateInterval = setInterval(function(){
 				
 			var remaining = duration + startTime - (new Date()).getTime();
-
 			if(remaining <= 0){ //jQuery动画停止的标志是时间，真正的时间
 
 				clearInterval(animateInterval)
@@ -100,6 +122,17 @@ define(['.../units/units','../style/style','../sizzle/sizzle'],function(units,st
 				style.set(elem,props);
 				//执行回调
 				complete && complete.call(elem);
+				//继续执行队列中的下一个动画
+				animateQueue =  data(elem,'animate');
+				//console.log(animateQueue);
+				animateQueue.shift();
+				if(animateQueue.length){	//如果队列中还有动画继续执行
+					execAnimate.apply(window,animateQueue[0]);
+				}else{
+					data.remove(elem,'animate');
+				}
+				
+				
 				return;
 			}
 			
@@ -126,7 +159,7 @@ define(['.../units/units','../style/style','../sizzle/sizzle'],function(units,st
 			
 				
 		},time)
-				
+		
 	}
 	
 	animate.jQueryEasing = jQueryEasing;

@@ -8,9 +8,9 @@ define(['.../units/units'],function(units){
 	
 	
 	
-	var action = {
+
 		//nodeType : 1||9 dom 或者 document
-		add:function(elem,val,data){
+		var data = function(elem,val,data){
 			var index,
 				myCache;
 			//elem.x = {x:{x:1}}
@@ -29,15 +29,18 @@ define(['.../units/units'],function(units){
 				if(!data) {
 					return myCache[val];
 				}
-				myCache[val] ? myCache[val].push(data) : 
-								myCache[val] = [data];
+				
+				myCache[val] = data;
 
-				return myCache[val];
+				return data;
 			}
 
 			return null;
-		},
-		del:function(elem,val,data){
+		}
+		
+		
+		
+		data.remove = function(elem,val,data){
 			var index,
 				myCache,
 				myCacheVal,
@@ -68,18 +71,6 @@ define(['.../units/units'],function(units){
 			return null;
 
 		}
-	}
-
-
-
-
-	var data = action.data;
-	
-	data.remove = action.del;
-	
-
-	
-
 	
 
 	return data;

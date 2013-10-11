@@ -1,72 +1,8 @@
-define(['.../units/units','./data/data'],function(units,data){
+define(['.../units/units','../data/data'],function(units,data){
 
 	"use strict";
 
-	var cacheData = {},
-		uuid = 1,
-		expando = 'cache' + ( +new Date() + "" ).slice( -8 );  // 生成随机数
-
 	var action = {
-		//nodeType : 1||9 dom 或者 document
-		data:function(elem,val,data){
-			var index,
-				myCache;
-			//elem.x = {x:{x:1}}
-			/**
-			dom可以缓存数据，用cacheData是不是有为了 data有统一入口 对外部是关闭的
-			**/
-			if(elem.window || /\b[1|9]\b/.test(elem.nodeType)){
-				index = elem[expando];
-				if(!index){
-					elem[expando] = ++uuid ;
-					index = uuid;
-					cacheData[index] = {};
-				}
-
-				myCache = cacheData[index];
-				if(!data) {
-					return myCache[val];
-				}
-				myCache[val] ? myCache[val].push(data) : 
-								myCache[val] = [data];
-
-				return myCache[val];
-			}
-
-			return null;
-		},
-
-		delData:function(elem,val,data){
-			var index,
-				myCache,
-				myCacheVal,
-				i = 0,
-				len;
-
-			if(elem.window || /\b[1|9]\b/.test(elem.nodeType)){
-				index = elem[expando];
-				if(!index){
-					return null;
-				}
-				myCache = cacheData[index];
-				myCacheVal = myCache[val];
-				if(myCacheVal){
-					if(!data){
-						myCache[val] = null;
-						return myCacheVal;
-					}
-					for(len = myCacheVal.length ; i<len ; i++){
-						if(data == myCacheVal[i]){
-						   return myCacheVal.splice(i,1);
-						}
-					}
-				}
-				
-			}
-
-			return null;
-
-		},
 		addEvent : function(elem,type,handler){
 			if(elem.addEventListener){
 				elem.addEventListener(type,handler,false);
@@ -119,40 +55,41 @@ define(['.../units/units','./data/data'],function(units,data){
 			fn:回调
 		**/
 		on:function(elem,eventType,handler){
-			var dataVal = eventType+'Events',
-				dataData;
-				
-			dataData = action.data(elem,dataVal,handler);
+			var dataVal = eventType+'Events';
+			
+			var handlers = data(elem,dataVal);
+			handlers = handlers ? handlers :[];
+			handlers.push(handler);
+			data(elem,dataVal,handlers)
 
-			if(dataData.length === 1){
+			if(handlers.length === 1){
 
 				var eventHandler = function(e){
 					
 					var event = action.fixEvent(e || window.event);
 					
-					dataData = action.data(elem,dataVal);
+					handlers = data(elem,dataVal);
 
-					if(!dataData){
+					if(!handlers){
 						return;
 					}
 					
-					for(var i=0;i<dataData.length;i++){
-						if(units.getType(dataData[i]) === 'Function'){
-							dataData[i](event);
+					for(var i=0;i<handlers.length;i++){
+						if(units.getType(handlers[i]) === 'Function'){
+							handlers[i](event);
 						}
 					}
 				}
 
 				action.addEvent(elem,eventType,eventHandler);
-				//action.delEvent(elem,eventType,eventHandler);
-				action.data(elem,eventType,eventHandler);
+				data(elem,eventType,eventHandler);
 			}
 
 		},
 		off:function(elem,eventType,handler){
-			action.delData(elem,eventType+'Events',handler);
+			data.del(elem,eventType+'Events',handler);
 			if(!handler){
-				var evnetHandler = action.data(elem,eventType);
+				var evnetHandler = data(elem,eventType);
 				//console.log(evnetHandler);
 				action.delEvent(elem,eventType,evnetHandler);
 			}
