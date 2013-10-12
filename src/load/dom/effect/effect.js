@@ -12,13 +12,34 @@ define(['.../utils/utils','../style/style','../data/data'],function(utils,style,
 		}
 	};
 	
-	var IEColorModel
+	var IEColorModel = /^#([a-f0-7]{3}|[a-f0-7]{6})$/i,
+		W3CColorModel = /rgb\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*\)/i;
+	
 	
 	//颜色转换器
 	var colorValAdapter = function(colorVal){
 		
-		var nomalColorVal;
-		
+		var nomalColorVal = [],
+			realyColorVal = W3CColorModel.exec(colorVal),
+			separater;
+		//console.log(realyColorVal)
+		//return;
+		if(realyColorVal){
+			realyColorVal.shift();
+			nomalColorVal = realyColorVal;
+		}else{
+			realyColorVal = IEColorModel.exec(colorVal);
+			if( realyColorVal[1].length === 3 ){
+				realyColorVal[1] = realyColorVal[1].replace(/\w/i,function($1){
+					return $1+$1;
+				})
+			}
+			nomalColorVal = [
+								parseInt(realyColorVal[1].substr(0,2),16),
+								parseInt(realyColorVal[1].substr(2,2),16),
+								parseInt(realyColorVal[1].substr(4,2),16)
+							]
+		}
 		
 		
 		return nomalColorVal;
@@ -73,7 +94,6 @@ define(['.../utils/utils','../style/style','../data/data'],function(utils,style,
 		}
 		
 		var args = [elem,props,duration,easing,complete];
-		
 		var animateQueue =  data(elem,'animate');
 		
 		//队列中已有动画在执行，把当前动画存储起来，延迟执行
@@ -108,23 +128,29 @@ define(['.../utils/utils','../style/style','../data/data'],function(utils,style,
 		//初始化可以动画的样式distance
 		utils.each(props,function(key,value){
 			if(styleMeasureByNumericPattern.test(key)){
-			
+				var currentStyle = style.get(elem,key);
+				//颜色的转换
+				if(/color/i.test(key)){
+					//console.log(currentStyle)
+					currentStyle = colorValAdapter(currentStyle);
+					value = colorValAdapter(value);
+					distance[key] = [];
+					utils.each(currentStyle,function(colorKey,colorValue){
+						distance[key].push( parseInt(colorValue,10) - parseInt(currentStyle[colorKey],10));
+					});
+					return true;
+				}
+				
 				value = /^\s*(\-?(?:0+\.)?\d+)/.exec(value);
 
 				if(value && value.length >= 2){
-				
 					value = value[1]*1;
-					var currentStyle = style.get(elem,key);
-
 					origin[key] = parseFloat(currentStyle,10);
 					distance[key] = value - origin[key];
-					return;
+					return true;
 				}
 				
-				//颜色的转换
-				if(/color/i.test(key)){
-					
-				}
+				
 			}
 		})
 		
@@ -167,10 +193,10 @@ define(['.../utils/utils','../style/style','../data/data'],function(utils,style,
 				
 				originVal = originVal + value*pos;
 
-				if(!/opacity/i.test(key)){
+				if(!/opacity|color/i.test(key)){
 					originVal += 'px';
 				}
-
+				console.log(value)
 				runtimeVal[key] = originVal;
 			})
 			
