@@ -2,6 +2,7 @@ define(['.../units/units','../style/style','../data/data'],function(units,style,
 
 	"use strict";
 	
+	//缓动函数
 	var jQueryEasing = {
 		linear: function( p ) {
 			return p;
@@ -11,7 +12,19 @@ define(['.../units/units','../style/style','../data/data'],function(units,style,
 		}
 	};
 	
-	var styleMeasureByNumericPattern = /(width|height|left|top|opacity|font\-*size|margin|padding|border)/i;
+	var IEColorModel
+	
+	//颜色转换器
+	var colorValAdapter = function(colorVal){
+		
+		var nomalColorVal;
+		
+		
+		
+		return nomalColorVal;
+	}
+	
+	var styleMeasureByNumericPattern = /(width|height|left|top|opacity|font\-*size|margin|padding|border|color)/i;
 	
 	//默认参数
 	var defaultVal = {
@@ -99,11 +112,18 @@ define(['.../units/units','../style/style','../data/data'],function(units,style,
 				value = /^\s*(\-?(?:0+\.)?\d+)/.exec(value);
 
 				if(value && value.length >= 2){
+				
 					value = value[1]*1;
-					var currentStyle = style.get(elem,key)
+					var currentStyle = style.get(elem,key);
 
-					origin[key] = parseFloat(currentStyle,10)
+					origin[key] = parseFloat(currentStyle,10);
 					distance[key] = value - origin[key];
+					return;
+				}
+				
+				//颜色的转换
+				if(/color/i.test(key)){
+					
 				}
 			}
 		})
