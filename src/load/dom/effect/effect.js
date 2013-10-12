@@ -1,4 +1,4 @@
-define(['.../units/units','../style/style','../data/data'],function(units,style,data){
+define(['.../utils/utils','../style/style','../data/data'],function(utils,style,data){
 
 	"use strict";
 	
@@ -48,7 +48,7 @@ define(['.../units/units','../style/style','../data/data'],function(units,style,
 		
 		//初始化参数
 		if(duration){
-			type = units.getType(duration);
+			type = utils.getType(duration);
 			
 			if(type === 'Function'){
 				complete = duration;
@@ -61,7 +61,7 @@ define(['.../units/units','../style/style','../data/data'],function(units,style,
 		}
 		
 		if(easing){
-			type = units.getType(easing);	
+			type = utils.getType(easing);	
 			
 			if(type === 'Function'){
 				complete = easing;
@@ -106,7 +106,7 @@ define(['.../units/units','../style/style','../data/data'],function(units,style,
 		//console.log(duration,easing,complete)
 		//return;
 		//初始化可以动画的样式distance
-		units.each(props,function(key,value){
+		utils.each(props,function(key,value){
 			if(styleMeasureByNumericPattern.test(key)){
 			
 				value = /^\s*(\-?(?:0+\.)?\d+)/.exec(value);
@@ -162,7 +162,7 @@ define(['.../units/units','../style/style','../data/data'],function(units,style,
 
 			//根据偏移百分比计算偏移量，需要知道什么样的样式是以数值做单位的
 			//width,height,left,top,opacity,font-size,margin,padding,border
-			units.each(distance,function(key,value){
+			utils.each(distance,function(key,value){
 				var originVal = origin[key];
 				
 				originVal = originVal + value*pos;

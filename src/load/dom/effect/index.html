@@ -44,11 +44,11 @@
 		
 		
 		require.openDebug();
-		require(['./effect','.../units/units','./jquery.easing.1.3.js'],function(animate,units,easing){
+		require(['./effect','.../utils/utils','./jquery.easing.1.3.js'],function(animate,utils,easing){
 			
 			var oDiv = document.getElementById('oDiv');
 			
-			units.extend(animate.jQueryEasing,easing);
+			utils.extend(animate.jQueryEasing,easing);
 			
 			//console.log(animate.jQueryEasing);
 			

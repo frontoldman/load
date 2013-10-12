@@ -1,4 +1,4 @@
-define(['.../units/units','../data/data'],function(units,data){
+define(['.../utils/utils','../data/data'],function(utils,data){
 
 	"use strict";
 
@@ -75,7 +75,7 @@ define(['.../units/units','../data/data'],function(units,data){
 					}
 					
 					for(var i=0;i<handlers.length;i++){
-						if(units.getType(handlers[i]) === 'Function'){
+						if(utils.getType(handlers[i]) === 'Function'){
 							handlers[i](event);
 						}
 					}

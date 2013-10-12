@@ -1,5 +1,5 @@
 define(function(){
-	var units = {}
+	var utils = {}
 	
 
 	//取得数据类型
@@ -135,11 +135,11 @@ define(function(){
 	
 	
 	
-	units.getType = getType;
-	units.each = each;
-	units.trim = trim;
-	units.extend = extend;
-	units.filter = filter;
+	utils.getType = getType;
+	utils.each = each;
+	utils.trim = trim;
+	utils.extend = extend;
+	utils.filter = filter;
 	
-	return units;
+	return utils;
 })

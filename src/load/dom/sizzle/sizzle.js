@@ -5,7 +5,7 @@
 		3、特殊字符过滤已经筛选到的dom,返回数组。
 **/
 
-define(['.../units/units'],function(units){
+define(['.../utils/utils'],function(utils){
 	
 	var doc = document,
 		concat = Array.prototype.concat,
@@ -23,12 +23,12 @@ define(['.../units/units'],function(units){
 						try{
 							slice.call(document.documentElement.childNodes, 0)[0].nodeType;
 							makeArrayFn = function(obj){
-								return units.getType(obj) === 'Array' ? obj : slice.call(obj,0);
+								return utils.getType(obj) === 'Array' ? obj : slice.call(obj,0);
 							}
 						}catch(e){
 							makeArrayFn = function(obj){
 								
-								if(units.getType(obj) === 'Array'){
+								if(utils.getType(obj) === 'Array'){
 									return obj;
 								}
 								
@@ -62,7 +62,7 @@ define(['.../units/units'],function(units){
 		}else{
 			eles = context.getElementsByTagName('*');
 			
-			var temp = units.filter(eles,function(key,value){
+			var temp = utils.filter(eles,function(key,value){
 				clsNameAry = value.className.split(/\s+/);
 				
 				//class名字 是区分大小写的
@@ -182,9 +182,9 @@ define(['.../units/units'],function(units){
 	
 	//逗号分割符
 	function splitByComma(selector,context){
-		selector = units.trim(selector);
+		selector = utils.trim(selector);
 		var selectorAry = selector.split(/\,/),temp = [];
-		units.each(selectorAry,function(key,value){
+		utils.each(selectorAry,function(key,value){
 			
 			var spaceDoms = splitBySpace(value,context)
 			temp.push(makeArray(spaceDoms));
@@ -203,11 +203,11 @@ define(['.../units/units'],function(units){
 
 	//空格分隔符
 	function splitBySpace(selector,context){
-		selector = units.trim(selector);	
+		selector = utils.trim(selector);	
 		var selectorAry = selector.split(/\s+/)
 			,parents = context;
 		
-		units.each(selectorAry,function(key,value){
+		utils.each(selectorAry,function(key,value){
 			
 			var selectorPattern,result ;
 			for(var i in patternSelector){
@@ -368,7 +368,7 @@ define(['.../units/units'],function(units){
 		
 		//console.log(domsLocated)
 		
-		var temp = units.filter(domsLocated,function(key,value){
+		var temp = utils.filter(domsLocated,function(key,value){
 			var dom = characteristicsFilter(selector,value);
 			if(dom){
 				return true;
@@ -387,7 +387,7 @@ define(['.../units/units'],function(units){
 	function splitByPlus(selector,domsLocated){
 		var temp = [];
 		//console.log(domsLocated)
-		units.each(domsLocated,function(key,value){
+		utils.each(domsLocated,function(key,value){
 			var nextSibling = next(value,selector);
 			
 			if(nextSibling){
@@ -402,7 +402,7 @@ define(['.../units/units'],function(units){
 	function splitByAngleBrackets(selector,domsLocated){
 		var temp = [];
 		//console.log(domsLocated)
-		units.each(domsLocated,function(key,value){
+		utils.each(domsLocated,function(key,value){
 			var child = children(value,selector);
 			
 			if(child){
@@ -420,7 +420,7 @@ define(['.../units/units'],function(units){
 		
 		//console.log(domsLocated)
 		
-		units.each(domsLocated,function(key,value){
+		utils.each(domsLocated,function(key,value){
 			var singleDomnexts = nexts(value,selector);
 			
 			//console.log(singleDomnexts)
@@ -466,7 +466,7 @@ define(['.../units/units'],function(units){
 				throw 'selector error';
 			}
 			
-			temp = units.filter(domsLocated,function(key,value){
+			temp = utils.filter(domsLocated,function(key,value){
 				var domAttrName = value.getAttribute(attrName);
 				//取不到显示设置的属性，尝试一下默认属性
 				if(!domAttrName){
@@ -524,7 +524,7 @@ define(['.../units/units'],function(units){
 	var colonBasicFilters = {
 		'^even$':function(domsLocated,execAry){	//偶数
 					var evenChild ;
-					evenChild = units.filter(domsLocated,function(key,value){
+					evenChild = utils.filter(domsLocated,function(key,value){
 						if(key%2 === 0){
 							return true;
 						}
@@ -533,7 +533,7 @@ define(['.../units/units'],function(units){
 				},
 		'^odd$':function(domsLocated,execAry){	//奇数
 							var oddChild ;
-							oddChild = units.filter(domsLocated,function(key,value){
+							oddChild = utils.filter(domsLocated,function(key,value){
 								if(key%2 != 0){
 									return true;
 								}
@@ -586,7 +586,7 @@ define(['.../units/units'],function(units){
 										
 										//console.log(execAry)
 										
-										notChild = units.filter(domsLocated,function(key,value){
+										notChild = utils.filter(domsLocated,function(key,value){
 											return true;
 										})
 										
@@ -600,7 +600,7 @@ define(['.../units/units'],function(units){
 	var colonChildrenFilters = {
 		'^first-child$':function(domsLocated,execAry){
 								var childSet = [];		
-								units.each(domsLocated,function(key,value){
+								utils.each(domsLocated,function(key,value){
 									var childs = children(value.parentNode);
 									
 									if(childs[0] == value){
@@ -612,7 +612,7 @@ define(['.../units/units'],function(units){
 							},
 		'^last-child$':function(domsLocated,execAry){
 								var childSet = [],len,childs ;		
-								units.each(domsLocated,function(key,value){
+								utils.each(domsLocated,function(key,value){
 									childs = children(value.parentNode);
 									len = childs.length;
 									if(childs[len-1] == value){
@@ -635,16 +635,16 @@ define(['.../units/units'],function(units){
 												locationPatternExecResult = locationPattern.exec(location);	
 												
 //												console.log(locationPatternExecResult)
-												units.each(domsLocated,function(domkey,domValue){
+												utils.each(domsLocated,function(domkey,domValue){
 													
 													childs = children(domValue.parentNode);
 													
 													if(locationPatternExecResult){
-														units.each(locationPatternExecResult,function(key,value){
+														utils.each(locationPatternExecResult,function(key,value){
 															if(key !=0 && value){
 																switch(value){
 																	case 'even':
-																				units.each(childs,function(index,sibling){
+																				utils.each(childs,function(index,sibling){
 																					if(sibling == domValue && (index+1)%2 === 0){
 																						//console.log(index)
 																						childSet.push(domValue);
@@ -653,7 +653,7 @@ define(['.../units/units'],function(units){
 																				})
 																				break;
 																	case 'odd':
-																				units.each(childs,function(index,sibling){
+																				utils.each(childs,function(index,sibling){
 																					if(sibling == domValue && (index+1)%2 != 0){
 																						childSet.push(domValue);
 																						return false;
@@ -661,7 +661,7 @@ define(['.../units/units'],function(units){
 																				})
 																				break;
 																	default:
-																			units.each(childs,function(index,sibling){
+																			utils.each(childs,function(index,sibling){
 																				if(sibling == domValue){
 																					if(key == 3 && (index+1) == value){
 																						childSet.push(domValue);
@@ -704,7 +704,7 @@ define(['.../units/units'],function(units){
 								tagName,
 								type;
 							//console.log(domsLocated)
-							temp = units.filter(domsLocated,function(key,value){
+							temp = utils.filter(domsLocated,function(key,value){
 								tagName = value.tagName;
 
 								if(/(input)|(button)/i.test(tagName)){									
@@ -723,7 +723,7 @@ define(['.../units/units'],function(units){
 							var temp = [],
 								tagName,
 								type;
-							temp = units.filter(domsLocated,function(key,value){
+							temp = utils.filter(domsLocated,function(key,value){
 								tagName = value.tagName;
 
 								if(/input/i.test(tagName)){									
@@ -801,7 +801,7 @@ define(['.../units/units'],function(units){
 		_children = makeArray(_children);
 		
 		if(sign){
-			_children = units.filter(_children,function(key,value){
+			_children = utils.filter(_children,function(key,value){
 				var isSuccessDom = characteristicsFilter(sign,value);
 				if(isSuccessDom != null){
 					return true;
@@ -866,6 +866,6 @@ define(['.../units/units'],function(units){
 		return dom.getAttribute(attrStr)
 	}
 	
-	//sizzle.units = units;
+	//sizzle.utils = utils;
 	return  sizzle;
 })

@@ -1,4 +1,4 @@
-define(['.../units/units'],function(units){
+define(['.../utils/utils'],function(utils){
 	
 	var isIE = document.documentElement.currentStyle,
 		de=document.documentElement;
@@ -174,7 +174,7 @@ define(['.../units/units'],function(units){
 			return;
 		}
 
-		var propType = units.getType(prop);
+		var propType = utils.getType(prop);
 		if(propType === 'String'){
 			if(!value) return;
 			prop = formatProp(prop);
@@ -186,7 +186,7 @@ define(['.../units/units'],function(units){
 			}
 			elem.style[prop] = value;
 		}else if(propType === 'Object'){
-			units.each(prop,function(key,value){
+			utils.each(prop,function(key,value){
 				setStyleFn(elem,key,value);
 			})
 		}
