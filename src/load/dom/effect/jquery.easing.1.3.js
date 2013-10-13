@@ -151,7 +151,7 @@ define(function(){
 			return c/2*((t-=2)*t*(((s*=(1.525))+1)*t + s) + 2) + b;
 		},
 		easeInBounce: function (x, t, b, c, d) {
-			return c - jQuery.easing.easeOutBounce (x, d-t, 0, c, d) + b;
+			return c - this.easeOutBounce (x, d-t, 0, c, d) + b;
 		},
 		easeOutBounce: function (x, t, b, c, d) {
 			if ((t/=d) < (1/2.75)) {
@@ -165,8 +165,8 @@ define(function(){
 			}
 		},
 		easeInOutBounce: function (x, t, b, c, d) {
-			if (t < d/2) return jQuery.easing.easeInBounce (x, t*2, 0, c, d) * .5 + b;
-			return jQuery.easing.easeOutBounce (x, t*2-d, 0, c, d) * .5 + c*.5 + b;
+			if (t < d/2) return this.easeInBounce (x, t*2, 0, c, d) * .5 + b;
+			return this.easeOutBounce (x, t*2-d, 0, c, d) * .5 + c*.5 + b;
 		}
 	}
 })

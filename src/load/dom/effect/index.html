@@ -62,15 +62,18 @@
 				'overflow':'hidden',
 				'zoom':'1',	//chrome认识这个属性，额 写样式的时候加*
 				'opacity':'0.5'
-			},1000,function(){})
+			},1000,'easeOutBounce',function(){})
 			
 			animate(oDiv,{
-				'width':'100px'
-			},2000)
+				'width':'100px',
+				'color':'#ff0f0f'
+			},2000,'easeInOutBounce')
 			
 			animate(oDiv,{
-				'width':'1000px'
-			},2000)
+				'width':'1000px',
+				'color':'#0f0f00'
+			},2000,'easeOutElastic')
+			
 		})
 	</script>
 </body>
