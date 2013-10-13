@@ -21,30 +21,39 @@ define(['.../utils/utils','../style/style','../data/data'],function(utils,style,
 		
 		var nomalColorVal = [],
 			realyColorVal = W3CColorModel.exec(colorVal),
-			separater;
+			separater,
+			i;
 		//console.log(realyColorVal)
 		//return;
 		if(realyColorVal){
 			realyColorVal.shift();
-			nomalColorVal = realyColorVal;
+			for( i = 0;i<3;i++){
+				nomalColorVal.push(parseInt(realyColorVal[i],10));
+			}
+			//nomalColorVal = realyColorVal;
 		}else{
 			realyColorVal = IEColorModel.exec(colorVal);
 			if( realyColorVal[1].length === 3 ){
-				realyColorVal[1] = realyColorVal[1].replace(/\w/i,function($1){
+				//console.log(realyColorVal[1])
+				realyColorVal[1] = realyColorVal[1].replace(/./ig,function($1){
+					//console.log($2)
 					return $1+$1;
 				})
 			}
-			nomalColorVal = [
-								parseInt(realyColorVal[1].substr(0,2),16),
-								parseInt(realyColorVal[1].substr(2,2),16),
-								parseInt(realyColorVal[1].substr(4,2),16)
-							]
+			
+			//console.log(realyColorVal[1])
+			for( i = 0 ; i<6 ;i += 2){
+				nomalColorVal.push(parseInt(realyColorVal[1].substr(i,2),16))
+			}
+			//console.log(nomalColorVal)
 		}
 		
+		//console.log(nomalColorVal)
 		
 		return nomalColorVal;
 	}
 	
+	//可以过渡的样式正则
 	var styleMeasureByNumericPattern = /(width|height|left|top|opacity|font\-*size|margin|padding|border|color)/i;
 	
 	//默认参数
@@ -134,9 +143,11 @@ define(['.../utils/utils','../style/style','../data/data'],function(utils,style,
 					//console.log(currentStyle)
 					currentStyle = colorValAdapter(currentStyle);
 					value = colorValAdapter(value);
+
+					origin[key] = currentStyle;
 					distance[key] = [];
-					utils.each(currentStyle,function(colorKey,colorValue){
-						distance[key].push( parseInt(colorValue,10) - parseInt(currentStyle[colorKey],10));
+					utils.each(currentStyle,function(RGBKey,RGBValue){
+						distance[key].push( value[RGBKey] - RGBValue);
 					});
 					return true;
 				}
@@ -154,7 +165,8 @@ define(['.../utils/utils','../style/style','../data/data'],function(utils,style,
 			}
 		})
 		
-
+		//console.log(origin)
+		//console.log(distance)
 		
 		//return ;
 		
@@ -187,18 +199,39 @@ define(['.../utils/utils','../style/style','../data/data'],function(utils,style,
 			var pos = animate.jQueryEasing[easing]( percent ,duration * percent,0, 1, duration);
 
 			//根据偏移百分比计算偏移量，需要知道什么样的样式是以数值做单位的
-			//width,height,left,top,opacity,font-size,margin,padding,border
+			//width,height,left,top,opacity,font-size,margin,padding,border,color
 			utils.each(distance,function(key,value){
-				var originVal = origin[key];
+				var originVal = origin[key],
+					i,
+					RGBAry = '#',
+					RGBVal;
 				
-				originVal = originVal + value*pos;
-
-				if(!/opacity|color/i.test(key)){
-					originVal += 'px';
+				
+				
+				if(/color/i.test(key)){
+					for(i=0;i<originVal.length;i++){
+						RGBVal = originVal[i]+value[i]*pos;
+						//console.log(originVal[i])
+						RGBVal = Math.ceil(RGBVal).toString(16);
+						RGBVal = RGBVal.length < 2 ? '0' + RGBVal : RGBVal;
+						RGBAry += RGBVal;
+					}
+					
+					originVal = RGBAry;
+				}else{
+					originVal = originVal + value*pos;
+					if(!/opacity/i.test(key)){
+						originVal += 'px';
+					}
 				}
-				console.log(value)
+				
+				
+				//console.log(originVal)
+				//console.log(key)
+				//console.log(originVal)
 				runtimeVal[key] = originVal;
 			})
+			
 			
 			
 			style.set(elem,runtimeVal);
