@@ -28,11 +28,11 @@
 
 		//重置console,解决ie6报错
         if(!global.console){
-             global.console = {
+            global.console = {
                 log:function(msg){
-        					alert(msg);
-        				}
-             }
+					alert(msg);
+				}
+            }
         }
 	
 	/*
@@ -108,27 +108,27 @@
                     modulesLists.length ++;
                     callback();
 				}else if(currentLoad){
-						//console.log(module + ':loading');
-						//判断这个脚本是不是正在加载，却还没有加载成功，并没有成功解析
-						(function(list_n){
-							var list_n_interval = setInterval(function(){
-													var exports = __loaderContainer[list_n];
-													//console.log(__loaderContainer)
-													if(exports){
-														//页面中的require不会出现循环依赖，so这里是不必要的
-														if(exports.__$delay$){//循环依赖会出现有exports,并且__$delay$ = true
-															//clearInterval(list_n_interval);//暴力破坏循环依赖
-															//console.log('循环依赖？？？？')
-															//return false;
-														}else{
-															
-															modulesLists.length ++;
-															clearInterval(list_n_interval);
-															callback()
-														}													
-													}
-												},1)						
-						})(url[i])	
+					//console.log(module + ':loading');
+					//判断这个脚本是不是正在加载，却还没有加载成功，并没有成功解析
+					(function(list_n){
+						var list_n_interval = setInterval(function(){
+							var exports = __loaderContainer[list_n];
+							//console.log(__loaderContainer)
+							if(exports){
+								//页面中的require不会出现循环依赖，so这里是不必要的
+								if(exports.__$delay$){//循环依赖会出现有exports,并且__$delay$ = true
+									//clearInterval(list_n_interval);//暴力破坏循环依赖
+									//console.log('循环依赖？？？？')
+									//return false;
+								}else{
+									
+									modulesLists.length ++;
+									clearInterval(list_n_interval);
+									callback()
+								}													
+							}
+						},1)						
+					})(url[i])	
                 }else{     
                     __loadScript(url[i],function(exports,url){
                         modulesLists[modulesLists[url]]= exports;
@@ -176,178 +176,159 @@
            // _script.onload = _script.onreadystatechange = _script.onerror = null; //处理ie9双绑定以及loaded complete顺序错乱的问题
 			if(!this.readyState || /loaded|complete/.test(this.readyState)){
 
- 
-               //非IE 判断最新随机数的模块为当前模块
-                if(!__isIE){
-                    __loaderContainer[url] = __loaderContainer[__recentRandom];
-                    var id = __mappingOfIDAndURL[__recentRandom];
-                    if(id){
-                       __mappingOfIDAndURL[url] = id; 
-                    }
-                    delete __loaderContainer[__recentRandom];
-                    __recentRandom = 0;
-                }
+			//非IE 判断最新随机数的模块为当前模块
+			if(!__isIE){
+				__loaderContainer[url] = __loaderContainer[__recentRandom];
+				var id = __mappingOfIDAndURL[__recentRandom];
+				if(id){
+				   __mappingOfIDAndURL[url] = id; 
+				}
+				delete __loaderContainer[__recentRandom];
+				__recentRandom = 0;
+			}
 
-                //不是标准模块的加载处理?????????不打算处理了
+				//不是标准模块的加载处理?????????不打算处理了
 
 
-                //IE 在模块define的时候已经取得当前url,已经push进去了
-               // console.log(__loaderContainer[url])
-                if(__loaderContainer[url]) {
-                    if(!__loaderContainer[url].__$delay$){//模块中包含__$delay$ 就是有依赖的模块需要等待
-                       // console.log('入口');
-                        args[1](__loaderContainer[url],url);
-                    }else{                                  //为了能够执行回调，把回调返回到这个临时对象中，
-                        __loaderContainer[url].factory = args[1];
-                        __loaderContainer[url].url = url;
-                    }                    
-                    __recentRandom = 0;
-                }else{                                      //标准模块是可以准确的判断加载是否成功
-                    __loaderContainer[url] = false;
-                    console.log( url + '加载失败！');
-                }
-                _script.onload = _script.onreadystatechange = null;//解决ie9双绑定的问题
+				//IE 在模块define的时候已经取得当前url,已经push进去了
+				// console.log(__loaderContainer[url])
+				if(__loaderContainer[url]) {
+					if(!__loaderContainer[url].__$delay$){//模块中包含__$delay$ 就是有依赖的模块需要等待
+					   // console.log('入口');
+						args[1](__loaderContainer[url],url);
+					}else{                                  //为了能够执行回调，把回调返回到这个临时对象中，
+						__loaderContainer[url].factory = args[1];
+						__loaderContainer[url].url = url;
+					}                    
+					__recentRandom = 0;
+				}else{                                      //标准模块是可以准确的判断加载是否成功
+					__loaderContainer[url] = false;
+					console.log( url + '加载失败！');
+				}
+				_script.onload = _script.onreadystatechange = null;//解决ie9双绑定的问题
 
-                if ( _script.parentNode && !debug) {             //他们都这么写
-                    _script.parentNode.removeChild( _script );
-                }
+				if ( _script.parentNode && !debug) {             //他们都这么写
+					_script.parentNode.removeChild( _script );
+				}
 
-                // Dereference the _script
-                _script = null;
+				// Dereference the _script
+				_script = null;
 			}
 		}
 
 
-        _script.onerror = function(){
-            __loaderContainer[url] = false;
-            console.log( url + '加载失败！ onerror');
-            if(_script){
-                _script.onerror = null;
-                _script = null;
-            }
-        }
-
-
-        currentlyAddingScript = _script;
-        __head.insertBefore( _script, __head.firstChild );
-		__loaderContainer.__TemporaryLoadList[url] = true;
-        currentlyAddingScript = null;
+	_script.onerror = function(){
+		__loaderContainer[url] = false;
+		console.log( url + '加载失败！ onerror');
+		if(_script){
+			_script.onerror = null;
+			_script = null;
+		}
 	}
 
-    /**
-     *    AMD设计出一个简洁的写模块API：define 。
 
-         define(id?, dependencies?, factory);
+	currentlyAddingScript = _script;
+	__head.insertBefore( _script, __head.firstChild );
+	__loaderContainer.__TemporaryLoadList[url] = true;
+	currentlyAddingScript = null;
+	}
 
-         其中：
-         id: 模块标识，可以省略。
-         dependencies: 所依赖的模块，可以省略。
-         factory: 模块的实现，或者一个JavaScript对象。
-     * @private
-     */
-    __define = function(){  
-       var args = __slice.call(arguments,0);
+	/**
+	 *    AMD设计出一个简洁的写模块API：define 。
 
-       if(args.length === 1){       //一个参数执行回调
-           argslength1(args[0]);
-       }else if(args.length === 2){     //两个参数加载依赖，执行回调
-           argslength2(args[1],args[0]);          
-       } else if(args.length === 3){    //三个参数，再说吧
-           argslength2(args[2],args[1],args[0]);
-       }
-    }
+		 define(id?, dependencies?, factory);
+
+		 其中：
+		 id: 模块标识，可以省略。
+		 dependencies: 所依赖的模块，可以省略。
+		 factory: 模块的实现，或者一个JavaScript对象。
+	 * @private
+	 */
+	__define = function(){  
+	   var args = __slice.call(arguments,0);
+
+	   if(args.length === 1){       //一个参数执行回调
+		   argslength1(args[0]);
+	   }else if(args.length === 2){     //两个参数加载依赖，执行回调
+		   argslength2(args[1],args[0]);          
+	   } else if(args.length === 3){    //三个参数，再说吧
+		   argslength2(args[2],args[1],args[0]);
+	   }
+	}
 
     //一个参数
-    var argslength1 = function(funOrObj,id){
-        funOrObj =  __type(funOrObj) === "[object Function]" ? funOrObj() : funOrObj;
-        __analyticDefine(funOrObj,id);
-    }
+	var argslength1 = function(funOrObj,id){
+		funOrObj =  __type(funOrObj) === "[object Function]" ? funOrObj() : funOrObj;
+		__analyticDefine(funOrObj,id);
+	}
 
     //二个参数
-   var argslength2 = function (funOrObj, relay ,id) {
+		var argslength2 = function (funOrObj, relay ,id) {
 		
 		
 		//依赖到这里肯定是有的，所以注释掉
-       //if(!relay.length){    //判断依赖是否合理
-       //    argslength1(funOrObj); 
-       //    return;
-       //}
-       //__tempFactory是个临时模块，通过这个理临时模块占位，然后通过这个临时模块带回来url和回调函数，一层一层的
-       //递归下去，(其实不是递归，只不过把当前回调传入到下一层去了)
-       var deep = { length:0 },
-          __tempFactory = {__$delay$:true},//这是一个神奇的对象
-	        i = 0 ,
-          len,
-          currentLoad,
-          currentRelay,
-          module,
-          currentRelayList = {};
+		//if(!relay.length){    //判断依赖是否合理
+		//    argslength1(funOrObj); 
+		//    return;
+		//}
+		//__tempFactory是个临时模块，通过这个理临时模块占位，然后通过这个临时模块带回来url和回调函数，一层一层的
+		//递归下去，(其实不是递归，只不过把当前回调传入到下一层去了)
+		var deep = { length:0 },
+		  __tempFactory = {__$delay$:true},//这是一个神奇的对象
+			i = 0 ,
+		  len,
+		  currentLoad,
+		  currentRelay,
+		  module,
+		  currentRelayList = {};
 		    
        __analyticDefine(__tempFactory,id);            //第一个脚本已经load,需要解析,有依赖，传入一个对象延迟执行
 		
 
 		//通过一个异步让模块先解析完成并获得url
 		setTimeout(function(){
-			//console.log(__tempFactory.url)
-      
-     // var 
-
 
 			relay = formatURL(relay,__tempFactory.url);
 			for (len = relay.length; i < len; i++) {    
           
-        
-
-        currentRelay = relay[i];
+				currentRelay = relay[i];
 				deep[currentRelay] = i;          //顺序传递参数
 				currentLoad = __loaderContainer.__TemporaryLoadList[currentRelay];
 				module = __loaderContainer[currentRelay];
-				//console.log(__loaderContainer[relay[i]])
-				//console.log(relay[i])
-				//console.log(__loaderContainer[relay[i]])
-
-        if(checkRelay(__tempFactory.url,currentRelay)){
-          //循环依赖暴力破解
-          console.log('你为何放弃治疗？')
-          return;
-        };
+				
+				if(checkRelay(__tempFactory.url,currentRelay)){
+				  //循环依赖暴力破解
+				  console.log('你为何放弃治疗？')
+				  return;
+				};
 
 				currentRelayList[currentRelay] = true;
-				
-			   if(module && !module.__$delay$){	
-					
-          defineCallback(module,currentRelay);
-			   
-         }else if(currentLoad){
-					//console.log(module + ':loading');
+
+				if(module && !module.__$delay$){	
+					defineCallback(module,currentRelay);
+				}else if(currentLoad){
 					//判断这个脚本是不是正在加载，却还没有加载成功，并没有成功解析
 					(function(list_n){
 						var list_n_interval = setInterval(function(){
-												var exports = __loaderContainer[list_n];
-												if(exports){
-													//console.log(exports)
-													//循环依赖这里判断不准确
-													if(!exports.__$delay$){														
-														clearInterval(list_n_interval);
-														defineCallback(exports,list_n)
-													}													
-												}
-											},1)						
+							var exports = __loaderContainer[list_n];
+							if(exports){
+								//循环依赖这里判断不准确
+								if(!exports.__$delay$){														
+									clearInterval(list_n_interval);
+									defineCallback(exports,list_n)
+								}													
+							}
+						},1)						
 					})(currentRelay)					
 			   }else{
-					//console.log(module + ':toLoad')
 					__loadScript(currentRelay,function(exports,url){  //需要把所有的exports传入到a的回调中去
 						defineCallback(exports,url);
 					})
 			   }
 			}
 
+			__loaderContainer.relayList[__tempFactory.url] = currentRelayList;//依赖列表赋值
 
-      
-
-      __loaderContainer.relayList[__tempFactory.url] = currentRelayList;//依赖列表赋值
-     // console.log(__loaderContainer.relayList);
-      //console.log()
 			//TODO:修复ie延时问题
 			//此处为ie加个延迟,ie不能正确解析模块与对应url之间的关系，导致地址判断异常，在模块较多的时候延时会比较严重
 		},__isIE?11:0)
@@ -412,16 +393,15 @@
 			//根据originUrl判断是从html页面引入的模块还是从define里面引入的模块
 			_prefixUrl = originUrl?dirname(originUrl):prefixUrl,
 			currentPre = _prefixUrl;
-		//	console.log(_prefixUrl + ":" +originUrl)
-        relay = __type(relay) === "[object String]" ? [relay] : relay;
-         if (relay && __type(relay) === "[object Array]") {
+
+		relay = __type(relay) === "[object String]" ? [relay] : relay;
+        if (relay && __type(relay) === "[object Array]") {
             for(var i = 0 ,len = relay.length; i<len;i++){
                 currentUrl = relay[i].replace(/^\s+|\s+$/g,"");//去掉首尾空格
                 if(currentUrl.length<=0){
                     relay.splice(i,1);
                     continue;
                 }
-				
 				
 				
 				//转换相对路径为绝对路径
@@ -439,14 +419,11 @@
         
 				}else{
 					currentPre = '';
-				}			
-			     
-				//console.log(currentUrl,currentPre)
+				}
 				 
 				currentUrl = currentPre + currentUrl;
 				currentPre = _prefixUrl;
-				//console.log(currentUrl)
-				//TODO url格式化还要在整理整理，其他的格式比如a?x=1,a#11
+
                 relay[i] = /\.\w+\s*$/.test(currentUrl) ? currentUrl : currentUrl + '.js'; 
             }
          }
@@ -491,7 +468,7 @@
     //暴露两个全局函数
     //define 模块定义函数
     //require 模块加载函数
-    global.define = __define;
+	global.define = __define;
 	global.require = __load ;
 
 })(this)
