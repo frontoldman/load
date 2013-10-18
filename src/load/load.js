@@ -4,36 +4,36 @@
 */
 
 ;(function(global){
-    var __load ,    //加载主函数入口
-        __define,   //定义函数 
+	var __load ,    //加载主函数入口
+		__define,   //定义函数 
 		__loadScript, //加载脚本函数
-        __generatRandomNumber,  //随机数生成器用于在非IE中onload中取得刚define的脚本
-        __loaderContainer = {} ,    //模块存储单元
-        __mappingOfIDAndURL = {},   //自定义id与URL的映射表
-        __isIE =  global.attachEvent && !global.opera,  //判断是否ie
-        __recentRandom = 0, //全局随机数
-        __analyticDefine,   //脚本解析器
+		__generatRandomNumber,  //随机数生成器用于在非IE中onload中取得刚define的脚本
+		__loaderContainer = {} ,    //模块存储单元
+		__mappingOfIDAndURL = {},   //自定义id与URL的映射表
+		__isIE =  global.attachEvent && !global.opera,  //判断是否ie
+		__recentRandom = 0, //全局随机数
+		__analyticDefine,   //脚本解析器
 
-        __type = function(object){
-            return Object.prototype.toString.call(object);
-        },
+		__type = function(object){
+			return Object.prototype.toString.call(object);
+		},
 		__slice = Array.prototype.slice,
 		__head = document.head || document.getElementsByTagName('head')[0] || document.documentElement; //他们都这么写
 		
 		//这是一个正在加载的模块的列表存储器，用来解决加载相同模块的在很短时间内会出现同时加载的情况
 		__loaderContainer.__TemporaryLoadList = {};
 		//这是一个依赖列表，其作用是处理循环依赖
-    __loaderContainer.relayList = {};
+		__loaderContainer.relayList = {};
 
 
-		//重置console,解决ie6报错
-        if(!global.console){
-            global.console = {
-                log:function(msg){
-					alert(msg);
-				}
-            }
-        }
+	//重置console,解决ie6报错
+	if(!global.console){
+		global.console = {
+			log:function(msg){
+				alert(msg);
+			}
+		}
+	}
 	
 	/*
 	*解析url路径
@@ -46,37 +46,37 @@
 	prefixUrl = dirname(global.location.href);	
 
 
-   //从seajs抠出来的
-    var currentlyAddingScript;
-    var interactiveScript;
+	//从seajs抠出来的
+	var currentlyAddingScript;
+	var interactiveScript;
 
-    var __getCurrentScript = function() {       //解决ie模块加载执行的时候onload不能按照正常顺序执行
-        if (currentlyAddingScript) {
-            return currentlyAddingScript;
-        }
+	var __getCurrentScript = function() {       //解决ie模块加载执行的时候onload不能按照正常顺序执行
+		if (currentlyAddingScript) {
+			return currentlyAddingScript;
+		}
 
-        // For IE6-9 browsers, the script onload event may not fire right
-        // after the the script is evaluated. Kris Zyp found that it
-        // could query the script nodes and the one that is in "interactive"
-        // mode indicates the current script.
-        // Ref: http://goo.gl/JHfFW
-        if (interactiveScript && interactiveScript.readyState === 'interactive') {
-            return interactiveScript;
-        }
+		// For IE6-9 browsers, the script onload event may not fire right
+		// after the the script is evaluated. Kris Zyp found that it
+		// could query the script nodes and the one that is in "interactive"
+		// mode indicates the current script.
+		// Ref: http://goo.gl/JHfFW
+		if (interactiveScript && interactiveScript.readyState === 'interactive') {
+			return interactiveScript;
+		}
 
-        var scripts = __head.getElementsByTagName('script');
+		var scripts = __head.getElementsByTagName('script');
 
-        for (var i = 0; i < scripts.length; i++) {
-            var script = scripts[i];
-            if (script.readyState === 'interactive') {
-                interactiveScript = script;
-                return interactiveScript;
-            }
-        }
-    };
+		for (var i = 0; i < scripts.length; i++) {
+			var script = scripts[i];
+			if (script.readyState === 'interactive') {
+				interactiveScript = script;
+				return interactiveScript;
+			}
+		}
+	};
 
   
-	
+
     //入口
 	__load = function(){   //require 的时候怎么判断模块之间有没有互相依赖呢???
 
@@ -217,20 +217,20 @@
 		}
 
 
-	_script.onerror = function(){
-		__loaderContainer[url] = false;
-		console.log( url + '加载失败！ onerror');
-		if(_script){
-			_script.onerror = null;
-			_script = null;
+		_script.onerror = function(){
+			__loaderContainer[url] = false;
+			console.log( url + '加载失败！ onerror');
+			if(_script){
+				_script.onerror = null;
+				_script = null;
+			}
 		}
-	}
 
 
-	currentlyAddingScript = _script;
-	__head.insertBefore( _script, __head.firstChild );
-	__loaderContainer.__TemporaryLoadList[url] = true;
-	currentlyAddingScript = null;
+		currentlyAddingScript = _script;
+		__head.insertBefore( _script, __head.firstChild );
+		__loaderContainer.__TemporaryLoadList[url] = true;
+		currentlyAddingScript = null;
 	}
 
 	/**
@@ -266,142 +266,142 @@
 		var argslength2 = function (funOrObj, relay ,id) {
 		
 		
-		//依赖到这里肯定是有的，所以注释掉
-		//if(!relay.length){    //判断依赖是否合理
-		//    argslength1(funOrObj); 
-		//    return;
-		//}
-		//__tempFactory是个临时模块，通过这个理临时模块占位，然后通过这个临时模块带回来url和回调函数，一层一层的
-		//递归下去，(其实不是递归，只不过把当前回调传入到下一层去了)
-		var deep = { length:0 },
-		  __tempFactory = {__$delay$:true},//这是一个神奇的对象
-			i = 0 ,
-		  len,
-		  currentLoad,
-		  currentRelay,
-		  module,
-		  currentRelayList = {};
-		    
-       __analyticDefine(__tempFactory,id);            //第一个脚本已经load,需要解析,有依赖，传入一个对象延迟执行
-		
-
-		//通过一个异步让模块先解析完成并获得url
-		setTimeout(function(){
-
-			relay = formatURL(relay,__tempFactory.url);
-			for (len = relay.length; i < len; i++) {    
-          
-				currentRelay = relay[i];
-				deep[currentRelay] = i;          //顺序传递参数
-				currentLoad = __loaderContainer.__TemporaryLoadList[currentRelay];
-				module = __loaderContainer[currentRelay];
+			//依赖到这里肯定是有的，所以注释掉
+			//if(!relay.length){    //判断依赖是否合理
+			//    argslength1(funOrObj); 
+			//    return;
+			//}
+			//__tempFactory是个临时模块，通过这个理临时模块占位，然后通过这个临时模块带回来url和回调函数，一层一层的
+			//递归下去，(其实不是递归，只不过把当前回调传入到下一层去了)
+			var deep = { length:0 },
+			  __tempFactory = {__$delay$:true},//这是一个神奇的对象
+				i = 0 ,
+			  len,
+			  currentLoad,
+			  currentRelay,
+			  module,
+			  currentRelayList = {};
 				
-				if(checkRelay(__tempFactory.url,currentRelay)){
-				  //循环依赖暴力破解
-				  console.log('你为何放弃治疗？')
-				  return;
-				};
+		   __analyticDefine(__tempFactory,id);            //第一个脚本已经load,需要解析,有依赖，传入一个对象延迟执行
+			
 
-				currentRelayList[currentRelay] = true;
+			//通过一个异步让模块先解析完成并获得url
+			setTimeout(function(){
 
-				if(module && !module.__$delay$){	
-					defineCallback(module,currentRelay);
-				}else if(currentLoad){
-					//判断这个脚本是不是正在加载，却还没有加载成功，并没有成功解析
-					(function(list_n){
-						var list_n_interval = setInterval(function(){
-							var exports = __loaderContainer[list_n];
-							if(exports){
-								//循环依赖这里判断不准确
-								if(!exports.__$delay$){														
-									clearInterval(list_n_interval);
-									defineCallback(exports,list_n)
-								}													
-							}
-						},1)						
-					})(currentRelay)					
-			   }else{
-					__loadScript(currentRelay,function(exports,url){  //需要把所有的exports传入到a的回调中去
-						defineCallback(exports,url);
-					})
-			   }
+				relay = formatURL(relay,__tempFactory.url);
+				for (len = relay.length; i < len; i++) {    
+			  
+					currentRelay = relay[i];
+					deep[currentRelay] = i;          //顺序传递参数
+					currentLoad = __loaderContainer.__TemporaryLoadList[currentRelay];
+					module = __loaderContainer[currentRelay];
+					
+					if(checkRelay(__tempFactory.url,currentRelay)){
+					  //循环依赖暴力破解
+					  console.log('你为何放弃治疗？')
+					  return;
+					};
+
+					currentRelayList[currentRelay] = true;
+
+					if(module && !module.__$delay$){	
+						defineCallback(module,currentRelay);
+					}else if(currentLoad){
+						//判断这个脚本是不是正在加载，却还没有加载成功，并没有成功解析
+						(function(list_n){
+							var list_n_interval = setInterval(function(){
+								var exports = __loaderContainer[list_n];
+								if(exports){
+									//循环依赖这里判断不准确
+									if(!exports.__$delay$){														
+										clearInterval(list_n_interval);
+										defineCallback(exports,list_n)
+									}													
+								}
+							},1)						
+						})(currentRelay)					
+				   }else{
+						__loadScript(currentRelay,function(exports,url){  //需要把所有的exports传入到a的回调中去
+							defineCallback(exports,url);
+						})
+				   }
+				}
+
+				__loaderContainer.relayList[__tempFactory.url] = currentRelayList;//依赖列表赋值
+
+				//TODO:修复ie延时问题
+				//此处为ie加个延迟,ie不能正确解析模块与对应url之间的关系，导致地址判断异常，在模块较多的时候延时会比较严重
+			},__isIE?11:0)
+			
+			   // }
+
+			function defineCallback(exports,url){
+				//console.log(exports)
+				var index = deep[url];               
+					deep[index] = exports ;
+					deep.length++ ;
+					if(deep.length >= len){
+						//能正确解析依赖的精髓
+						funOrObj =  __type(funOrObj) === "[object Function]" ? funOrObj.apply(null,__slice.call(deep,0)) : funOrObj;
+						__loaderContainer[__tempFactory.url] = funOrObj;
+						var id = __mappingOfIDAndURL[__tempFactory.url];
+						if(id){
+							__loaderContainer[id] = funOrObj;
+						}    
+						__tempFactory.factory(funOrObj,__tempFactory.url);
+					}
+			}
+		};
+
+		//处理模块之间互相依赖的函数
+		function checkRelay(currentModule,relayModule){
+				var isCircularDependencies,
+				  beforeRelay = __loaderContainer.relayList[relayModule];
+				  //console.log(currentModule,relayModule)
+				 // console.log(beforeRelay)
+
+				if(beforeRelay){
+				  for(var j in beforeRelay){
+					if(j == currentModule){
+					  isCircularDependencies = true;
+					  break;
+					}else if(__loaderContainer.relayList[j]){
+					  if(checkRelay(currentModule,j)){
+						isCircularDependencies = true;
+						break;
+					  }
+					}
+				  }
 			}
 
-			__loaderContainer.relayList[__tempFactory.url] = currentRelayList;//依赖列表赋值
 
-			//TODO:修复ie延时问题
-			//此处为ie加个延迟,ie不能正确解析模块与对应url之间的关系，导致地址判断异常，在模块较多的时候延时会比较严重
-		},__isIE?11:0)
-		
-       // }
+			return isCircularDependencies;
+		}
 
-        function defineCallback(exports,url){
-			//console.log(exports)
-            var index = deep[url];               
-                deep[index] = exports ;
-                deep.length++ ;
-                if(deep.length >= len){
-                    //能正确解析依赖的精髓
-                    funOrObj =  __type(funOrObj) === "[object Function]" ? funOrObj.apply(null,__slice.call(deep,0)) : funOrObj;
-                    __loaderContainer[__tempFactory.url] = funOrObj;
-                    var id = __mappingOfIDAndURL[__tempFactory.url];
-                    if(id){
-                        __loaderContainer[id] = funOrObj;
-                    }    
-                    __tempFactory.factory(funOrObj,__tempFactory.url);
-                }
-        }
-    };
+	//。。。。
+	var argslength3 = function(){
 
-    //处理模块之间互相依赖的函数
-    function checkRelay(currentModule,relayModule){
-      var isCircularDependencies,
-          beforeRelay = __loaderContainer.relayList[relayModule];
-          //console.log(currentModule,relayModule)
-         // console.log(beforeRelay)
+	}
 
-        if(beforeRelay){
-          for(var j in beforeRelay){
-            if(j == currentModule){
-              isCircularDependencies = true;
-              break;
-            }else if(__loaderContainer.relayList[j]){
-              if(checkRelay(currentModule,j)){
-                isCircularDependencies = true;
-                break;
-              }
-            }
-          }
-        }
-
-        
-        return isCircularDependencies;
-    }
-
-    //。。。。
-    var argslength3 = function(){
-
-    }
-
-    //过滤传入，格式化传入的参数
+	//过滤传入，格式化传入的参数
 	/**
 		relay:String||Array 模块的依赖列表
 		originUrl:模块的URL
 	**/
-    function formatURL(relay,originUrl){
+	function formatURL(relay,originUrl){
 		var currentUrl,
 			//根据originUrl判断是从html页面引入的模块还是从define里面引入的模块
 			_prefixUrl = originUrl?dirname(originUrl):prefixUrl,
 			currentPre = _prefixUrl;
 
 		relay = __type(relay) === "[object String]" ? [relay] : relay;
-        if (relay && __type(relay) === "[object Array]") {
-            for(var i = 0 ,len = relay.length; i<len;i++){
-                currentUrl = relay[i].replace(/^\s+|\s+$/g,"");//去掉首尾空格
-                if(currentUrl.length<=0){
-                    relay.splice(i,1);
-                    continue;
-                }
+		if (relay && __type(relay) === "[object Array]") {
+			for(var i = 0 ,len = relay.length; i<len;i++){
+				currentUrl = relay[i].replace(/^\s+|\s+$/g,"");//去掉首尾空格
+				if(currentUrl.length<=0){
+					relay.splice(i,1);
+					continue;
+				}
 				
 				
 				//转换相对路径为绝对路径
@@ -413,10 +413,10 @@
 					var directoryDeep = /(\.+)\.\//.exec(currentUrl)[1].length,//目录深度					
 						newPrefixUrlPattern = new RegExp('(\\\w+\/){'+ directoryDeep +'}$','ig'),
 						theDirectoryNeedToBeReplaced = newPrefixUrlPattern.exec(_prefixUrl)[0];	
-            				
+							
 					currentPre = _prefixUrl.replace(theDirectoryNeedToBeReplaced,'');
 					currentUrl = /\.+\/(.*)$/.exec(currentUrl)[1];
-        
+		
 				}else{
 					currentPre = '';
 				}
@@ -424,50 +424,50 @@
 				currentUrl = currentPre + currentUrl;
 				currentPre = _prefixUrl;
 
-                relay[i] = /\.\w+\s*$/.test(currentUrl) ? currentUrl : currentUrl + '.js'; 
-            }
-         }
-         //console.log(relay)
-         return relay;
-    }
-    /**
-     *随机数生成器，通过全局的__recentRandom在非IE浏览器下面取得已经解析的模块
-     * @private
-     */
-    __generatRandomNumber = function(){
-        return __recentRandom = Math.random();
-    }
+				relay[i] = /\.\w+\s*$/.test(currentUrl) ? currentUrl : currentUrl + '.js'; 
+			}
+		 }
+		 //console.log(relay)
+		 return relay;
+	}
+	/**
+	 *随机数生成器，通过全局的__recentRandom在非IE浏览器下面取得已经解析的模块
+	 * @private
+	 */
+	__generatRandomNumber = function(){
+		return __recentRandom = Math.random();
+	}
 
 
-    //存储模块，根据url存储模块
-    __analyticDefine = function(moudle,id){
-        var url;
-        __generatRandomNumber();
-        if(__isIE){
-            var currentScript = __getCurrentScript();
-            //  url = currentScript.src;   IE8 + 会取得绝对路径，有问题
-            url = currentScript.getAttribute("src");
-            __loaderContainer[url] = moudle;
-            if(id){
-                __loaderContainer[id] = __loaderContainer[url];
-                __mappingOfIDAndURL[url] = id;
-            }
-        } else {
-            __loaderContainer[__recentRandom] = moudle;
-            if(id){
-                __loaderContainer[id] = __loaderContainer[__recentRandom];
-                __mappingOfIDAndURL[__recentRandom] = id;
-            }
-        }
+	//存储模块，根据url存储模块
+	__analyticDefine = function(moudle,id){
+		var url;
+		__generatRandomNumber();
+		if(__isIE){
+			var currentScript = __getCurrentScript();
+			//  url = currentScript.src;   IE8 + 会取得绝对路径，有问题
+			url = currentScript.getAttribute("src");
+			__loaderContainer[url] = moudle;
+			if(id){
+				__loaderContainer[id] = __loaderContainer[url];
+				__mappingOfIDAndURL[url] = id;
+			}
+		} else {
+			__loaderContainer[__recentRandom] = moudle;
+			if(id){
+				__loaderContainer[id] = __loaderContainer[__recentRandom];
+				__mappingOfIDAndURL[__recentRandom] = id;
+			}
+		}
 
-    }
+	}
 
 
     
 
-    //暴露两个全局函数
-    //define 模块定义函数
-    //require 模块加载函数
+	//暴露两个全局函数
+	//define 模块定义函数
+	//require 模块加载函数
 	global.define = __define;
 	global.require = __load ;
 
